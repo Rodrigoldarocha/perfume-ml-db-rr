@@ -59,7 +59,6 @@ function Index() {
 
   return (
     <Layout>
-      nao esta
       <section className="bg-primary/5 py-24 mb-12">
         <div className="container mx-auto px-4 text-center">
           <Badge variant="outline" className="mb-6 uppercase tracking-[0.3em] font-light border-primary/20 text-primary">
