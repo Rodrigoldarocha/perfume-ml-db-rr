@@ -82,11 +82,13 @@ function Quiz() {
                />
              </div>
           </div>
-          <h2 className="text-3xl font-serif text-primary tracking-wide">{steps[currentStep].title}</h2>
+          <h2 className="text-3xl font-serif text-primary tracking-wide">
+            {steps[currentStep]?.title}
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          {steps[currentStep].options.map((option) => (
+          {steps[currentStep]?.options.map((option) => (
             <button
               key={option}
               onClick={() => handleSelect(option)}
