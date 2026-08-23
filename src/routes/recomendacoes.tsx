@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getRecommendations } from "@/services/perfume.functions";
 import { PerfumeCard } from "@/features/perfumes/components/PerfumeCard";
 import { Layout } from "@/components/Layout";
 import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
-import { Suspense } from "react";
 
 const searchSchema = z.object({
   genero: z.string().catch("Unissex"),
@@ -17,11 +16,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/recomendacoes")({
-  component: () => (
-    <Suspense fallback={<RecommendationLoading />}>
-      <Recomendacoes />
-    </Suspense>
-  ),
+  component: Recomendacoes,
   validateSearch: (search) => searchSchema.parse(search),
   head: () => ({
     title: "Suas Recomendações Personalizadas | ParfumSeg",
@@ -33,23 +28,23 @@ export const Route = createFileRoute("/recomendacoes")({
   })
 });
 
-function RecommendationLoading() {
-  return (
-    <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4 opacity-20" />
-        <p className="text-muted-foreground font-serif uppercase tracking-widest text-xs">Calculando sua assinatura olfativa...</p>
-      </div>
-    </Layout>
-  );
-}
-
 function Recomendacoes() {
   const search = Route.useSearch();
-  const { data: recommendations } = useSuspenseQuery({
+  const { data: recommendations, isLoading, isError } = useQuery({
     queryKey: ["recommendations", search],
     queryFn: () => getRecommendations({ data: search }),
   });
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-4 opacity-20" />
+          <p className="text-muted-foreground font-serif uppercase tracking-widest text-xs">Calculando sua assinatura olfativa...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -92,7 +87,9 @@ function Recomendacoes() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-muted-foreground font-light text-xl">Não conseguimos encontrar recomendações exatas no momento.</p>
+            <p className="text-muted-foreground font-light text-xl">
+              {isError ? "Ocorreu um erro ao carregar as recomendações." : "Não conseguimos encontrar recomendações exatas no momento."}
+            </p>
             <Button asChild className="mt-8 rounded-none uppercase tracking-widest text-xs">
               <Link to="/quiz">Tentar novamente</Link>
             </Button>
