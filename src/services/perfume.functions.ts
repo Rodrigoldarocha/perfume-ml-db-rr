@@ -91,7 +91,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }).parse(data)
   )
   .handler(async ({ data }) => {
-    fs.appendFileSync("/tmp/recommender.log", "\nRECOMMENDER DEBUG\n"); const fs = require("fs");
+    console.log("\nRECOMMENDER DEBUG");
     console.log("-----------------");
 
     // 1. Geração de Candidatos (Base Completa)
@@ -103,9 +103,10 @@ export const getRecommendations = createServerFn({ method: "POST" })
     const targetGenero = data.genero.toLowerCase();
     
     if (targetGenero !== 'unissex') {
+      // Pequeno ajuste para mapear os termos do quiz para os termos do banco se necessário
+      // O quiz usa "Masculino", "Feminino" - o banco usa "masculino", "feminino"
       query = query.in("genero", [targetGenero as any, 'unissex']);
     } else {
-
       query = query.eq("genero", 'unissex');
     }
 
@@ -120,9 +121,13 @@ export const getRecommendations = createServerFn({ method: "POST" })
       const motivos: string[] = [];
 
       const acordes = (perfume.acordes_principais || []).map(a => a.toLowerCase());
-      if (acordes.includes(data.familia.toLowerCase())) {
+      const targetFamilia = data.familia.toLowerCase();
+      
+      if (acordes.includes(targetFamilia)) {
         score += 0.4;
         motivos.push(`Alta afinidade com a família ${data.familia}`);
+      } else if (acordes.some(a => a.includes(targetFamilia) || targetFamilia.includes(a))) {
+        score += 0.2;
       }
 
       const todasNotas = [
@@ -130,10 +135,13 @@ export const getRecommendations = createServerFn({ method: "POST" })
         ...(perfume.notas_coracao || []),
         ...(perfume.notas_fundo || [])
       ].map(n => n.toLowerCase());
+      const targetNota = data.nota.toLowerCase();
 
-      if (todasNotas.includes(data.nota.toLowerCase())) {
+      if (todasNotas.includes(targetNota)) {
         score += 0.3;
         motivos.push(`Contém notas de ${data.nota} que você aprecia`);
+      } else if (todasNotas.some(n => n.includes(targetNota) || targetNota.includes(n))) {
+        score += 0.15;
       }
 
       const acordesPesados = ['amadeirado', 'especiado', 'oriental', 'âmbar', 'couro'];
@@ -150,14 +158,14 @@ export const getRecommendations = createServerFn({ method: "POST" })
 
       return {
         ...(perfume as any),
-        genero: perfume.genero as any, // Cast para evitar erro de TS se necessário, mas aqui perfume.genero já é do tipo correto da tabela
+        genero: perfume.genero as any,
         compatibilityScore: Math.min(score, 1.0),
         recommendationReason: motivos.length > 0 ? motivos[0] : `Uma excelente escolha para ${data.ocasiao.toLowerCase()}`
       };
     });
 
     // 3. Ordenação e Threshold
-    const threshold = 0.5;
+    const threshold = 0.3; // Reduzindo o threshold inicial para ser menos restritivo
     let finalResults = scoredPerfumes
       .filter(p => p.compatibilityScore >= threshold)
       .sort((a, b) => b.compatibilityScore - a.compatibilityScore);
@@ -179,5 +187,3 @@ export const getRecommendations = createServerFn({ method: "POST" })
 
     return finalResults.slice(0, 10) as (Perfume & { compatibilityScore: number; recommendationReason: string })[];
   });
-
-
