@@ -1,17 +1,34 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getPerfumeById } from "@/services/perfume.functions";
 import { Layout } from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
-import { Star, ExternalLink } from "lucide-react";
+import { Star, ExternalLink, ChevronRight, Home } from "lucide-react";
+import { 
+  Breadcrumb, 
+  BreadcrumbItem, 
+  BreadcrumbLink, 
+  BreadcrumbList, 
+  BreadcrumbPage, 
+  BreadcrumbSeparator 
+} from "@/components/ui/breadcrumb";
 
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
-  head: () => ({
+  head: ({ loaderData }) => ({
+    title: `${loaderData?.nome} - ${loaderData?.marca} | ParfumSeg`,
     meta: [
-      { title: "Detalhes do Perfume | ParfumSeg" },
-    ],
+      { name: "description", content: `Descubra as notas de ${loaderData?.nome} da ${loaderData?.marca}. Acordes: ${loaderData?.acordes_principais.join(", ")}. Veja perfumes similares.` },
+      { property: "og:title", content: `${loaderData?.nome} - ${loaderData?.marca} | Pirâmide Olfativa` },
+      { property: "og:description", content: `Explore a composição detalhada e encontre fragrâncias parecidas com ${loaderData?.nome}.` },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" }
+    ]
   }),
+  loader: async ({ params }) => {
+    const { getPerfumeById } = await import("@/services/perfume.functions");
+    return getPerfumeById({ data: params.id });
+  }
 });
 
 function PerfumeDetail() {
