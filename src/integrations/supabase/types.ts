@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      perfumes: {
+        Row: {
+          acordes_principais: string[]
+          ano_lancamento: number | null
+          avaliacao: number | null
+          cluster: number | null
+          cluster_perfil: string | null
+          created_at: string | null
+          genero: Database["public"]["Enums"]["perfume_genero"]
+          id: number
+          marca: string
+          nome: string
+          notas_coracao: string[]
+          notas_fundo: string[]
+          notas_saida: string[]
+          numero_avaliacoes: number | null
+          pais_origem: string | null
+          perfumista_1: string | null
+          perfumista_2: string | null
+          top5_similares: string[]
+          url_fonte: string
+        }
+        Insert: {
+          acordes_principais?: string[]
+          ano_lancamento?: number | null
+          avaliacao?: number | null
+          cluster?: number | null
+          cluster_perfil?: string | null
+          created_at?: string | null
+          genero: Database["public"]["Enums"]["perfume_genero"]
+          id?: number
+          marca: string
+          nome: string
+          notas_coracao?: string[]
+          notas_fundo?: string[]
+          notas_saida?: string[]
+          numero_avaliacoes?: number | null
+          pais_origem?: string | null
+          perfumista_1?: string | null
+          perfumista_2?: string | null
+          top5_similares?: string[]
+          url_fonte: string
+        }
+        Update: {
+          acordes_principais?: string[]
+          ano_lancamento?: number | null
+          avaliacao?: number | null
+          cluster?: number | null
+          cluster_perfil?: string | null
+          created_at?: string | null
+          genero?: Database["public"]["Enums"]["perfume_genero"]
+          id?: number
+          marca?: string
+          nome?: string
+          notas_coracao?: string[]
+          notas_fundo?: string[]
+          notas_saida?: string[]
+          numero_avaliacoes?: number | null
+          pais_origem?: string | null
+          perfumista_1?: string | null
+          perfumista_2?: string | null
+          top5_similares?: string[]
+          url_fonte?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +88,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      perfume_genero: "masculino" | "feminino" | "unissex"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +215,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      perfume_genero: ["masculino", "feminino", "unissex"],
+    },
   },
 } as const

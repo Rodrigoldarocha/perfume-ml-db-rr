@@ -1,0 +1,1 @@
+alter table public.perfumes add constraint perfumes_nome_marca_key unique (nome, marca);
