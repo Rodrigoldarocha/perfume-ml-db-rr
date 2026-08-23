@@ -3,8 +3,6 @@ import { Layout } from "@/components/Layout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
-import { getRecommendations } from "@/services/perfume.functions";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/quiz")({
@@ -48,10 +46,9 @@ function Quiz() {
   const [answers, setAnswers] = useState<string[]>([]);
   const [isFinished, setIsFinished] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const fetchRecommendations = useServerFn(getRecommendations);
   const navigate = useNavigate();
 
-  const handleSelect = async (option: string) => {
+  const handleSelect = (option: string) => {
     const newAnswers = [...answers];
     newAnswers[currentStep] = option;
     setAnswers(newAnswers);
@@ -66,8 +63,7 @@ function Quiz() {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
-      // Salva as recomendações no estado ou navega passando os parâmetros
-      // Por simplicidade e robustez com TanStack, vamos navegar para a nova rota com os parâmetros do quiz
+      // @ts-ignore - a rota será gerada após o salvamento do arquivo
       await navigate({
         to: "/recomendacoes",
         search: {
