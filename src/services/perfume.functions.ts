@@ -102,7 +102,6 @@ export const getRecommendations = createServerFn({ method: "POST" })
     let query = supabase.from("perfumes").select("*");
     const targetGenero = data.genero.toLowerCase();
     
-    // Se o usuário quer masculino/feminino, incluímos unissex como candidato também
     if (targetGenero !== 'unissex') {
       query = query.in("genero", [targetGenero, 'unissex']);
     } else {
@@ -119,14 +118,12 @@ export const getRecommendations = createServerFn({ method: "POST" })
       let score = 0;
       const motivos: string[] = [];
 
-      // Compatibilidade de Família Olfativa (via acordes)
       const acordes = (perfume.acordes_principais || []).map(a => a.toLowerCase());
       if (acordes.includes(data.familia.toLowerCase())) {
         score += 0.4;
         motivos.push(`Alta afinidade com a família ${data.familia}`);
       }
 
-      // Compatibilidade de Nota Preferida
       const todasNotas = [
         ...(perfume.notas_saida || []),
         ...(perfume.notas_coracao || []),
@@ -138,7 +135,6 @@ export const getRecommendations = createServerFn({ method: "POST" })
         motivos.push(`Contém notas de ${data.nota} que você aprecia`);
       }
 
-      // Heurística de Intensidade
       const acordesPesados = ['amadeirado', 'especiado', 'oriental', 'âmbar', 'couro'];
       const acordesLeves = ['cítrico', 'aquático', 'verde', 'aromático'];
       
@@ -152,7 +148,8 @@ export const getRecommendations = createServerFn({ method: "POST" })
       score += (perfume.avaliacao || 0) / 10;
 
       return {
-        ...perfume,
+        ...(perfume as any),
+        genero: perfume.genero as any, // Cast para evitar erro de TS se necessário, mas aqui perfume.genero já é do tipo correto da tabela
         compatibilityScore: Math.min(score, 1.0),
         recommendationReason: motivos.length > 0 ? motivos[0] : `Uma excelente escolha para ${data.ocasiao.toLowerCase()}`
       };
@@ -166,9 +163,8 @@ export const getRecommendations = createServerFn({ method: "POST" })
 
     console.log(`After profile filters & threshold (${threshold}): ${finalResults.length}`);
 
-    // 4. Fallback Hierárquico
     if (finalResults.length < 3) {
-      console.log("Fallback triggered: reducing threshold or returning top results...");
+      console.log("Fallback triggered: returning top results...");
       finalResults = scoredPerfumes
         .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
         .slice(0, 5);
@@ -180,6 +176,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
     console.log(`Final recommendations: ${finalResults.length}`);
     console.log("-----------------\n");
 
-    return finalResults.slice(0, 10);
+    return finalResults.slice(0, 10) as (Perfume & { compatibilityScore: number; recommendationReason: string })[];
   });
+
 
