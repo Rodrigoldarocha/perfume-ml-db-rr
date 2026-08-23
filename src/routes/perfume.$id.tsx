@@ -174,9 +174,9 @@ function PerfumeDetail() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {perfume.top5_similares.map((nomeSimilar) => (
-                <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm">
+                <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm group hover:shadow-md transition-shadow">
                   <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Similar</span>
-                  <h4 className="font-serif text-sm uppercase tracking-wider">{nomeSimilar}</h4>
+                  <h4 className="font-serif text-sm uppercase tracking-wider group-hover:text-primary transition-colors">{nomeSimilar}</h4>
                 </div>
               ))}
             </div>
