@@ -1,12 +1,47 @@
 import { createClient } from "@supabase/supabase-js";
-import natural from "natural";
 import { KMeans } from "ml-kmeans";
 import * as fs from "fs";
 import * as path from "path";
 
-// Initialize TF-IDF
-const TfIdf = natural.TfIdf;
-const tfidf = new TfIdf();
+// Simple TF-IDF implementation since 'natural' was incompatible
+class SimpleTfIdf {
+  documents: string[][] = [];
+  idfCache: Record<string, number> = {};
+
+  addDocument(text: string) {
+    this.documents.push(text.toLowerCase().split(/\s+/).filter(w => w.length > 2));
+  }
+
+  getTf(docIndex: number, term: string): number {
+    const doc = this.documents[docIndex];
+    if (!doc) return 0;
+    const count = doc.filter(t => t === term).length;
+    return count / doc.length;
+  }
+
+  getIdf(term: string): number {
+    if (this.idfCache[term] !== undefined) return this.idfCache[term];
+    const docsWithTerm = this.documents.filter(doc => doc.includes(term)).length;
+    const idf = Math.log(this.documents.length / (1 + docsWithTerm));
+    this.idfCache[term] = idf;
+    return idf;
+  }
+
+  getTfIdf(docIndex: number, term: string): number {
+    return this.getTf(docIndex, term) * this.getIdf(term);
+  }
+
+  listTerms(docIndex: number) {
+    const doc = this.documents[docIndex];
+    const uniqueTerms = Array.from(new Set(doc));
+    return uniqueTerms.map(term => ({
+      term,
+      tfidf: this.getTfIdf(docIndex, term)
+    }));
+  }
+}
+
+const tfidf = new SimpleTfIdf();
 
 async function seed() {
   console.log("Starting full seed process...");
