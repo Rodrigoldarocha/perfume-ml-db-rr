@@ -3,9 +3,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRecommendations } from "@/services/perfume.functions";
 import { PerfumeCard } from "@/features/perfumes/components/PerfumeCard";
 import { Layout } from "@/components/Layout";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
+import { Suspense } from "react";
 
 const searchSchema = z.object({
   genero: z.string().catch("Unissex"),
@@ -16,7 +17,11 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/recomendacoes")({
-  component: Recomendacoes,
+  component: () => (
+    <Suspense fallback={<RecommendationLoading />}>
+      <Recomendacoes />
+    </Suspense>
+  ),
   validateSearch: (search) => searchSchema.parse(search),
   head: () => ({
     title: "Suas Recomendações Personalizadas | ParfumSeg",
@@ -25,14 +30,21 @@ export const Route = createFileRoute("/recomendacoes")({
       { property: "og:title", content: "ParfumSeg | Recomendações Olfativas" },
       { property: "og:type", content: "website" }
     ]
-  }),
-  loaderDeps: ({ search }) => search,
-  loader: async ({ deps }) => {
-    return getRecommendations({ data: deps });
-  }
+  })
 });
 
-function Recomendacoes() { console.log("DEBUG: Renderizando Recomendacoes", recommendations);
+function RecommendationLoading() {
+  return (
+    <Layout>
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4 opacity-20" />
+        <p className="text-muted-foreground font-serif uppercase tracking-widest text-xs">Calculando sua assinatura olfativa...</p>
+      </div>
+    </Layout>
+  );
+}
+
+function Recomendacoes() {
   const search = Route.useSearch();
   const { data: recommendations } = useSuspenseQuery({
     queryKey: ["recommendations", search],
@@ -59,26 +71,26 @@ function Recomendacoes() { console.log("DEBUG: Renderizando Recomendacoes", reco
             <ArrowLeft className="w-3 h-3" /> Refazer Quiz
           </Link>
           <h3 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-medium">
-            {recommendations.length} {recommendations.length === 1 ? "Recomendação encontrada" : "Recomendações encontradas"}
+            {recommendations?.length || 0} {recommendations?.length === 1 ? "Recomendação encontrada" : "Recomendações encontradas"}
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {recommendations.map((perfume) => (
-            <div key={perfume.id} className="relative group">
-              <PerfumeCard perfume={perfume} />
-              {perfume.recommendationReason && (
-                <div className="absolute top-2 right-2 z-10">
-                  <div className="bg-primary text-primary-foreground text-[8px] uppercase tracking-tighter px-2 py-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    {perfume.recommendationReason}
+        {recommendations && recommendations.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {recommendations.map((perfume) => (
+              <div key={perfume.id} className="relative group">
+                <PerfumeCard perfume={perfume} />
+                {perfume.recommendationReason && (
+                  <div className="absolute top-2 right-2 z-10">
+                    <div className="bg-primary text-primary-foreground text-[8px] uppercase tracking-tighter px-2 py-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                      {perfume.recommendationReason}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {recommendations.length === 0 && (
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground font-light text-xl">Não conseguimos encontrar recomendações exatas no momento.</p>
             <Button asChild className="mt-8 rounded-none uppercase tracking-widest text-xs">
