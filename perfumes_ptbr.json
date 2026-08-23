@@ -1,0 +1,14 @@
+{
+  "nome": "Bleu de Chanel",
+  "marca": "Chanel",
+  "genero": "masculino",
+  "avaliacao": 4.5,
+  "numero_avaliacoes": 15000,
+  "ano_lancamento": 2010,
+  "notas_saida": ["Limão", "Hortelã", "Pimenta Rosa", "Toranja"],
+  "notas_coracao": ["Gengibre", "Iso E Super", "Jasmim", "Noz-moscada"],
+  "notas_fundo": ["Lábdano", "Sândalo", "Patchouli", "Vetiver", "Incenso", "Cedro", "Almíscar Branco"],
+  "acordes_principais": ["Cítrico", "Amadeirado", "Especiado Quente", "Aromático", "Âmbar"],
+  "perfumista_1": "Jacques Polge",
+  "url_fonte": "https://www.fragrantica.com/perfume/Chanel/Bleu-de-Chanel-9050.html"
+}
