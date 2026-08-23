@@ -1,14 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/quiz")({
   component: Quiz,
   head: () => ({
-    meta: [{ title: "Descobrir | Recomendador de Perfumes" }],
+    title: "Descobrir | Recomendador de Perfumes Inteligente | ParfumSeg",
+    meta: [
+      { name: "description", content: "Responda ao nosso quiz olfativo e encontre as fragrâncias que combinam com seu estilo, ocasião e notas favoritas." },
+      { property: "og:title", content: "Descobrir | Qual o Seu Perfume Ideal?" },
+      { property: "og:description", content: "Encontre sua essência através do nosso recomendador inteligente." },
+      { property: "og:type", content: "website" }
+    ]
   }),
 });
 
