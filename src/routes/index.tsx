@@ -107,10 +107,61 @@ function Index() {
 
         {data.perfumes.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-muted-foreground font-light">Nenhum perfume encontrado para sua busca.</p>
+            <p className="text-muted-foreground font-light text-xl">Nenhum perfume encontrado para sua busca.</p>
+            <Button variant="link" onClick={() => setSearch("")} className="mt-4 text-primary uppercase tracking-widest text-xs">
+              Limpar busca
+            </Button>
           </div>
         )}
       </div>
+
+      <section className="bg-white py-24 border-y border-primary/5">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-serif text-primary mb-12 text-center underline underline-offset-8 decoration-primary/20">
+              Perguntas Frequentes
+            </h2>
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border-primary/10">
+                  <AccordionTrigger className="text-left font-serif text-lg py-6 hover:no-underline hover:text-primary transition-colors">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground font-light leading-relaxed pb-6">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-accent/20 flex items-center justify-center mb-6">
+              <ShieldCheck className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="font-serif text-xl mb-4 uppercase tracking-widest">Base de Dados Confiável</h3>
+            <p className="text-sm text-muted-foreground font-light">Informações precisas de pirâmide olfativa e acordes, coletadas das maiores bases mundiais.</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-accent/20 flex items-center justify-center mb-6">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="font-serif text-xl mb-4 uppercase tracking-widest">IA Recomendadora</h3>
+            <p className="text-sm text-muted-foreground font-light">Nosso algoritmo proprietário encontra fragrâncias similares com base na composição química-olfativa.</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-accent/20 flex items-center justify-center mb-6">
+              <MessageSquare className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="font-serif text-xl mb-4 uppercase tracking-widest">Totalmente em Português</h3>
+            <p className="text-sm text-muted-foreground font-light">Todas as notas, marcas e descrições traduzidas e revisadas para o nosso idioma.</p>
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 }
