@@ -125,7 +125,7 @@ async function seed() {
   });
 
   // 3. Clustering (k-means)
-  const k = Math.min(12, perfumes.length);
+  const k = perfumes.length > 0 ? Math.min(12, perfumes.length) : 1;
   console.log(`Running K-Means clustering (k=${k})...`);
   const result = kmeans(vectors, k, { seed: 42 });
   const clusters = result.clusters;
