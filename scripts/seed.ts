@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { KMeans } from "ml-kmeans";
+import KMeans from "ml-kmeans";
 import * as fs from "fs";
 import * as path from "path";
 
