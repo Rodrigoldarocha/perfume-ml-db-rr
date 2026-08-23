@@ -7,13 +7,11 @@ import { Star, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
-  head: ({ loaderData }) => {
-    // Note: In TanStack Start v1, head() has access to loaderData if defined.
-    // We'll keep it simple for now as we use useSuspenseQuery.
-    return {
-      title: "Detalhes do Perfume | ParfumSeg",
-    };
-  }
+  head: () => ({
+    meta: [
+      { title: "Detalhes do Perfume | ParfumSeg" },
+    ],
+  }),
 });
 
 function PerfumeDetail() {
