@@ -155,15 +155,14 @@ export const getRecommendations = createServerFn({ method: "POST" })
       score += intensityScore;
 
 
-      score += (perfume.avaliacao || 0) / 10;
-
       return {
         ...(perfume as any),
         genero: perfume.genero as any,
         compatibilityScore: Math.min(score, 1.0),
-        recommendationReason: motivos.length > 0 ? motivos[0] : `Uma excelente escolha para ${data.ocasiao.toLowerCase()}`
+        recommendationReason: motivos.length > 0 ? motivos[0] : `Ideal para ${data.ocasiao.toLowerCase()}`
       };
     });
+
 
     // 3. Ordenação e Threshold
     const threshold = 0.3; // Reduzindo o threshold inicial para ser menos restritivo
