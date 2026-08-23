@@ -32,7 +32,7 @@ export const Route = createFileRoute("/recomendacoes")({
   }
 });
 
-function Recomendacoes() {
+function Recomendacoes() { console.log("DEBUG: Renderizando Recomendacoes", recommendations);
   const search = Route.useSearch();
   const { data: recommendations } = useSuspenseQuery({
     queryKey: ["recommendations", search],
