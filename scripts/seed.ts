@@ -1,64 +1,177 @@
 import { createClient } from "@supabase/supabase-js";
+import natural from "natural";
+import { KMeans } from "ml-kmeans";
+import * as fs from "fs";
+import * as path from "path";
+
+// Initialize TF-IDF
+const TfIdf = natural.TfIdf;
+const tfidf = new TfIdf();
 
 async function seed() {
-  console.log("Starting seed process...");
+  console.log("Starting full seed process...");
   
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing environment variables");
-    return;
+    console.error("Missing environment variables VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    process.exit(1);
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  console.log("Seeding dummy data for demonstration purposes...");
-
-  const perfumes = [
-    {
-      nome: "Bleu de Chanel",
-      marca: "Chanel",
-      genero: "masculino",
-      avaliacao: 4.5,
-      numero_avaliacoes: 15000,
-      ano_lancamento: 2010,
-      notas_saida: ["Limão", "Hortelã", "Pimenta Rosa", "Toranja"],
-      notas_coracao: ["Gengibre", "Iso E Super", "Jasmim", "Noz-moscada"],
-      notas_fundo: ["Lábdano", "Sândalo", "Patchouli", "Vetiver", "Incenso", "Cedro", "Almíscar Branco"],
-      acordes_principais: ["Cítrico", "Amadeirado", "Especiado Quente", "Aromático", "Âmbar"],
-      perfumista_1: "Jacques Polge",
-      url_fonte: "https://www.fragrantica.com/perfume/Chanel/Bleu-de-Chanel-9050.html",
-      cluster: 1,
-      cluster_perfil: "Amadeirado Aromático",
-      top5_similares: ["Sauvage", "Acqua di Gio Profumo"]
-    },
-    {
-      nome: "J'adore",
-      marca: "Dior",
-      genero: "feminino",
-      avaliacao: 4.2,
-      numero_avaliacoes: 12000,
-      ano_lancamento: 1999,
-      notas_saida: ["Pêra", "Melão", "Magnólia", "Pêssego", "Mandarina", "Bergamota"],
-      notas_coracao: ["Jasmim", "Lírio-do-vale", "Tuberosa", "Freesia", "Rosa", "Orquídea", "Ameixa", "Violeta"],
-      notas_fundo: ["Almíscar", "Baunilha", "Amora", "Cedro"],
-      acordes_principais: ["Floral", "Frutado", "Doce", "Fresco"],
-      perfumista_1: "Calice Becker",
-      url_fonte: "https://www.fragrantica.com/perfume/Dior/J-adore-210.html",
-      cluster: 2,
-      cluster_perfil: "Floral Frutado",
-      top5_similares: ["Miss Dior", "Chanel No 5"]
-    }
+  // 1. Locate dataset
+  const datasetPaths = [
+    "/mnt/user-uploads/perfumes_ptbr.json",
+    "/tmp/user-uploads/perfumes_ptbr.json",
+    "./perfumes_ptbr.json"
   ];
-
-  const { error } = await supabase.from("perfumes").upsert(perfumes, { onConflict: 'nome,marca' });
-
-  if (error) {
-    console.error("Error seeding data:", error);
-  } else {
-    console.log("Seed completed successfully!");
+  
+  let datasetPath = "";
+  for (const p of datasetPaths) {
+    if (fs.existsSync(p)) {
+      datasetPath = p;
+      break;
+    }
   }
+
+  if (!datasetPath) {
+    console.error("Dataset perfumes_ptbr.json not found in expected locations.");
+    // Fallback to dummy for now if we really can't find it, but the user says "o dataset do projeto é esse"
+    // so it MUST be there or arriving.
+    process.exit(1);
+  }
+
+  console.log(`Reading dataset from ${datasetPath}...`);
+  const rawData = fs.readFileSync(datasetPath, 'utf8');
+  let perfumes = JSON.parse(rawData);
+
+  console.log(`Processing ${perfumes.length} perfumes...`);
+
+  // 2. Vectorization for Clustering and Similarity
+  console.log("Vectorizing perfumes...");
+  
+  // Combine all relevant textual data for each perfume
+  const documents = perfumes.map((p: any) => {
+    const text = [
+      ...(p.notas_saida || []),
+      ...(p.notas_coracao || []),
+      ...(p.notas_fundo || []),
+      ...(p.acordes_principais || [])
+    ].join(" ");
+    tfidf.addDocument(text);
+    return text;
+  });
+
+  // Get all unique terms to build the vector space
+  const allTerms = new Set<string>();
+  perfumes.forEach((p: any) => {
+    [
+      ...(p.notas_saida || []),
+      ...(p.notas_coracao || []),
+      ...(p.notas_fundo || []),
+      ...(p.acordes_principais || [])
+    ].forEach(term => allTerms.add(term.toLowerCase()));
+  });
+  const termsArray = Array.from(allTerms);
+
+  // Create vectors
+  const vectors = perfumes.map((p: any, i: number) => {
+    const vector = new Array(termsArray.length).fill(0);
+    const docTerms = tfidf.listTerms(i);
+    docTerms.forEach(t => {
+      const index = termsArray.indexOf(t.term.toLowerCase());
+      if (index !== -1) {
+        vector[index] = t.tfidf;
+      }
+    });
+    return vector;
+  });
+
+  // 3. Clustering (k-means)
+  console.log("Running K-Means clustering (k=12)...");
+  const kmeans = new KMeans(vectors, 12, { seed: 42 });
+  const clusters = kmeans.clusters;
+
+  // 4. Similarity (Cosine Similarity for Top 5)
+  console.log("Calculating Top 5 similarities...");
+  function cosineSimilarity(vecA: number[], vecB: number[]) {
+    let dotProduct = 0;
+    let mA = 0;
+    let mB = 0;
+    for (let i = 0; i < vecA.length; i++) {
+      dotProduct += vecA[i] * vecB[i];
+      mA += vecA[i] * vecA[i];
+      mB += vecB[i] * vecB[i];
+    }
+    mA = Math.sqrt(mA);
+    mB = Math.sqrt(mB);
+    if ((mA * mB) === 0) return 0;
+    return dotProduct / (mA * mB);
+  }
+
+  // Assign clusters and find similarities
+  perfumes = perfumes.map((p: any, i: number) => {
+    const cluster = clusters[i];
+    
+    // Find top 5 similar perfumes (excluding self)
+    const similarities = perfumes
+      .map((other: any, j: number) => ({
+        nome: other.nome,
+        similarity: i === j ? -1 : cosineSimilarity(vectors[i], vectors[j])
+      }))
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, 5)
+      .map(s => s.nome);
+
+    return {
+      ...p,
+      cluster,
+      top5_similares: similarities
+    };
+  });
+
+  // 5. Cluster Profiles
+  console.log("Generating cluster profiles...");
+  const clusterProfiles: Record<number, string> = {};
+  for (let c = 0; c < 12; c++) {
+    const clusterPerfumes = perfumes.filter((p: any) => p.cluster === c);
+    const accordCounts: Record<string, number> = {};
+    clusterPerfumes.forEach((p: any) => {
+      p.acordes_principais.forEach((a: string) => {
+        accordCounts[a] = (accordCounts[a] || 0) + 1;
+      });
+    });
+    const topAccords = Object.entries(accordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(e => e[0]);
+    clusterProfiles[c] = topAccords.join(" ") || "Fragrância Única";
+  }
+
+  perfumes = perfumes.map((p: any) => ({
+    ...p,
+    cluster_perfil: clusterProfiles[p.cluster]
+  }));
+
+  // 6. Bulk Upsert to Supabase
+  console.log("Uploading to Supabase in chunks...");
+  const chunkSize = 500;
+  for (let i = 0; i < perfumes.length; i += chunkSize) {
+    const chunk = perfumes.slice(i, i + chunkSize);
+    const { error } = await supabase.from("perfumes").upsert(chunk, { onConflict: 'nome,marca' });
+    if (error) {
+      console.error(`Error seeding chunk ${i}-${i + chunkSize}:`, error);
+    } else {
+      console.log(`Uploaded chunk ${i}-${i + chunkSize}`);
+    }
+  }
+
+  console.log("Seed completed successfully!");
 }
 
-seed();
+seed().catch(err => {
+  console.error("Fatal error in seed script:", err);
+  process.exit(1);
+});
