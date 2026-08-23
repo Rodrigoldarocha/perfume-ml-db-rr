@@ -1,14 +1,30 @@
-{
-  "nome": "Bleu de Chanel",
-  "marca": "Chanel",
-  "genero": "masculino",
-  "avaliacao": 4.5,
-  "numero_avaliacoes": 15000,
-  "ano_lancamento": 2010,
-  "notas_saida": ["Limão", "Hortelã", "Pimenta Rosa", "Toranja"],
-  "notas_coracao": ["Gengibre", "Iso E Super", "Jasmim", "Noz-moscada"],
-  "notas_fundo": ["Lábdano", "Sândalo", "Patchouli", "Vetiver", "Incenso", "Cedro", "Almíscar Branco"],
-  "acordes_principais": ["Cítrico", "Amadeirado", "Especiado Quente", "Aromático", "Âmbar"],
-  "perfumista_1": "Jacques Polge",
-  "url_fonte": "https://www.fragrantica.com/perfume/Chanel/Bleu-de-Chanel-9050.html"
-}
+[
+  {
+    "nome": "Bleu de Chanel",
+    "marca": "Chanel",
+    "genero": "masculino",
+    "avaliacao": 4.5,
+    "numero_avaliacoes": 15000,
+    "ano_lancamento": 2010,
+    "notas_saida": ["Limão", "Hortelã", "Pimenta Rosa", "Toranja"],
+    "notas_coracao": ["Gengibre", "Iso E Super", "Jasmim", "Noz-moscada"],
+    "notas_fundo": ["Lábdano", "Sândalo", "Patchouli", "Vetiver", "Incenso", "Cedro", "Almíscar Branco"],
+    "acordes_principais": ["Cítrico", "Amadeirado", "Especiado Quente", "Aromático", "Âmbar"],
+    "perfumista_1": "Jacques Polge",
+    "url_fonte": "https://www.fragrantica.com/perfume/Chanel/Bleu-de-Chanel-9050.html"
+  },
+  {
+    "nome": "J'adore",
+    "marca": "Dior",
+    "genero": "feminino",
+    "avaliacao": 4.2,
+    "numero_avaliacoes": 12000,
+    "ano_lancamento": 1999,
+    "notas_saida": ["Pêra", "Melão", "Magnólia", "Pêssego", "Mandarina", "Bergamota"],
+    "notas_coracao": ["Jasmim", "Lírio-do-vale", "Tuberosa", "Freesia", "Rosa", "Orquídea", "Ameixa", "Violeta"],
+    "notas_fundo": ["Almíscar", "Baunilha", "Amora", "Cedro"],
+    "acordes_principais": ["Floral", "Frutado", "Doce", "Fresco"],
+    "perfumista_1": "Calice Becker",
+    "url_fonte": "https://www.fragrantica.com/perfume/Dior/J-adore-210.html"
+  }
+]
