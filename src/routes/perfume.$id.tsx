@@ -12,19 +12,23 @@ import {
   BreadcrumbPage, 
   BreadcrumbSeparator 
 } from "@/components/ui/breadcrumb";
+import { Perfume } from "@/types/perfume";
 
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
-  head: ({ loaderData }) => ({
-    title: `${loaderData?.nome} - ${loaderData?.marca} | ParfumSeg`,
-    meta: [
-      { name: "description", content: `Descubra as notas de ${loaderData?.nome} da ${loaderData?.marca}. Acordes: ${loaderData?.acordes_principais.join(", ")}. Veja perfumes similares.` },
-      { property: "og:title", content: `${loaderData?.nome} - ${loaderData?.marca} | Pirâmide Olfativa` },
-      { property: "og:description", content: `Explore a composição detalhada e encontre fragrâncias parecidas com ${loaderData?.nome}.` },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" }
-    ]
-  }),
+  head: ({ loaderData }) => {
+    const data = loaderData as Perfume;
+    return {
+      title: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "Detalhes do Perfume | ParfumSeg",
+      meta: [
+        { name: "description", content: data ? `Descubra as notas de ${data.nome} da ${data.marca}. Acordes: ${data.acordes_principais.join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
+        { property: "og:title", content: data ? `${data.nome} - ${data.marca} | Pirâmide Olfativa` : "ParfumSeg | Catálogo de Perfumes" },
+        { property: "og:description", content: data ? `Explore a composição detalhada e encontre fragrâncias parecidas com ${data.nome}.` : "Explore 24.000+ fragrâncias traduzidas." },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" }
+      ]
+    };
+  },
   loader: async ({ params }) => {
     const { getPerfumeById } = await import("@/services/perfume.functions");
     return getPerfumeById({ data: params.id });
@@ -40,7 +44,31 @@ function PerfumeDetail() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
+        <Breadcrumb className="mb-8">
+          <BreadcrumbList className="uppercase tracking-[0.2em] text-[10px]">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/" className="flex items-center gap-1"><Home className="w-3 h-3" /> Início</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <ChevronRight className="w-3 h-3" />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">Catálogo</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <ChevronRight className="w-3 h-3" />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-primary font-medium">{perfume.nome}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           {/* Image Placeholder Area */}
           <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5">
