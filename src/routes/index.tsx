@@ -27,7 +27,7 @@ function Index() {
 
   const { data } = useSuspenseQuery({
     queryKey: ["perfumes", { search: debouncedSearch }],
-    queryFn: () => getPerfumes({ search: debouncedSearch }),
+    queryFn: () => getPerfumes({ data: { search: debouncedSearch, page: 1, pageSize: 20 } }),
   });
 
   return (

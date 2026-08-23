@@ -54,7 +54,7 @@ export const getPerfumes = createServerFn({ method: "GET" })
   });
 
 export const getPerfumeById = createServerFn({ method: "GET" })
-  .inputValidator((id) => z.number().parse(id))
+  .inputValidator((id) => z.string().parse(id))
   .handler(async ({ data: id }) => {
     const { data, error } = await supabase
       .from("perfumes")
@@ -68,8 +68,6 @@ export const getPerfumeById = createServerFn({ method: "GET" })
 
 export const getDistinctMarcas = createServerFn({ method: "GET" }).handler(
   async () => {
-    // We'll just fetch a few for now or all distinct brands
-    // In a real app we might want a separate table or a more optimized way
     const { data, error } = await supabase
       .from("perfumes")
       .select("marca")
@@ -77,7 +75,6 @@ export const getDistinctMarcas = createServerFn({ method: "GET" }).handler(
 
     if (error) throw new Error(error.message);
     
-    // Unique brands
     const marcas = Array.from(new Set(data.map(p => p.marca)));
     return marcas;
   }
