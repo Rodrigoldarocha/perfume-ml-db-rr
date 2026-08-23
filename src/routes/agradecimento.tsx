@@ -7,6 +7,7 @@ export const Route = createFileRoute("/agradecimento")({
   component: Thanks,
   head: () => ({
     title: "Obrigado | ParfumSeg",
+    meta: [{ name: "description", content: "Sua mensagem foi enviada com sucesso." }]
   })
 });
 

@@ -10,12 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgradecimentoRouteImport } from './routes/agradecimento'
+import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as QuizRouteImport } from './routes/quiz'
 import { Route as PerfumeIdRouteImport } from './routes/perfume.$id'
+import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
+import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgradecimentoRoute = AgradecimentoRouteImport.update({
+  id: '/agradecimento',
+  path: '/agradecimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContatoRoute = ContatoRouteImport.update({
+  id: '/contato',
+  path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuizRoute = QuizRouteImport.update({
@@ -28,35 +48,90 @@ const PerfumeIdRoute = PerfumeIdRouteImport.update({
   path: '/perfume/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsTxtRoute = RobotsTxtRouteImport.update({
+  id: '/robots/txt',
+  path: '/robots/txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapXmlRoute = SitemapXmlRouteImport.update({
+  id: '/sitemap/xml',
+  path: '/sitemap/xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agradecimento': typeof AgradecimentoRoute
+  '/contato': typeof ContatoRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/quiz': typeof QuizRoute
   '/perfume/$id': typeof PerfumeIdRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agradecimento': typeof AgradecimentoRoute
+  '/contato': typeof ContatoRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/quiz': typeof QuizRoute
   '/perfume/$id': typeof PerfumeIdRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agradecimento': typeof AgradecimentoRoute
+  '/contato': typeof ContatoRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/quiz': typeof QuizRoute
   '/perfume/$id': typeof PerfumeIdRoute
+  '/robots/txt': typeof RobotsTxtRoute
+  '/sitemap/xml': typeof SitemapXmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/quiz' | '/perfume/$id'
+  fullPaths:
+    | '/'
+    | '/agradecimento'
+    | '/contato'
+    | '/privacidade'
+    | '/quiz'
+    | '/perfume/$id'
+    | '/robots/txt'
+    | '/sitemap/xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/quiz' | '/perfume/$id'
-  id: '__root__' | '/' | '/quiz' | '/perfume/$id'
+  to:
+    | '/'
+    | '/agradecimento'
+    | '/contato'
+    | '/privacidade'
+    | '/quiz'
+    | '/perfume/$id'
+    | '/robots/txt'
+    | '/sitemap/xml'
+  id:
+    | '__root__'
+    | '/'
+    | '/agradecimento'
+    | '/contato'
+    | '/privacidade'
+    | '/quiz'
+    | '/perfume/$id'
+    | '/robots/txt'
+    | '/sitemap/xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgradecimentoRoute: typeof AgradecimentoRoute
+  ContatoRoute: typeof ContatoRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   QuizRoute: typeof QuizRoute
   PerfumeIdRoute: typeof PerfumeIdRoute
+  RobotsTxtRoute: typeof RobotsTxtRoute
+  SitemapXmlRoute: typeof SitemapXmlRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +141,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agradecimento': {
+      id: '/agradecimento'
+      path: '/agradecimento'
+      fullPath: '/agradecimento'
+      preLoaderRoute: typeof AgradecimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contato': {
+      id: '/contato'
+      path: '/contato'
+      fullPath: '/contato'
+      preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quiz': {
@@ -82,13 +178,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfumeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots/txt': {
+      id: '/robots/txt'
+      path: '/robots/txt'
+      fullPath: '/robots/txt'
+      preLoaderRoute: typeof RobotsTxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/xml': {
+      id: '/sitemap/xml'
+      path: '/sitemap/xml'
+      fullPath: '/sitemap/xml'
+      preLoaderRoute: typeof SitemapXmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgradecimentoRoute: AgradecimentoRoute,
+  ContatoRoute: ContatoRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   QuizRoute: QuizRoute,
   PerfumeIdRoute: PerfumeIdRoute,
+  RobotsTxtRoute: RobotsTxtRoute,
+  SitemapXmlRoute: SitemapXmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
