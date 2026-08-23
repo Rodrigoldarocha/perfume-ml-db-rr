@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/quiz")({
   component: Quiz,
@@ -44,6 +45,8 @@ function Quiz() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [isFinished, setIsFinished] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleSelect = (option: string) => {
     const newAnswers = [...answers];
@@ -57,6 +60,29 @@ function Quiz() {
     }
   };
 
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+    try {
+      // @ts-ignore
+      await navigate({
+        to: "/recomendacoes",
+        search: {
+          genero: answers[0] || "Unissex",
+          familia: answers[1] || "Floral",
+          ocasiao: answers[2] || "Dia a dia",
+          intensidade: answers[3] || "Moderada",
+          nota: answers[4] || "Limão",
+        }
+      });
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Ocorreu um erro ao processar suas recomendações.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (isFinished) {
     return (
       <Layout>
@@ -64,10 +90,15 @@ function Quiz() {
           <Sparkles className="w-16 h-16 text-primary mx-auto mb-8 opacity-20" />
           <h2 className="text-4xl font-serif text-primary mb-6 uppercase tracking-widest">Encontramos sua essência</h2>
           <p className="text-muted-foreground font-light mb-12 max-w-lg mx-auto">
-            Baseado nas suas preferências, aqui estão as melhores recomendações para você.
+            Baseado nas suas preferências, preparamos uma seleção exclusiva de fragrâncias para você.
           </p>
-          <Button asChild className="rounded-none uppercase tracking-widest px-8">
-            <a href="/">Ver Recomendações</a>
+          <Button 
+            onClick={handleFinish} 
+            disabled={isSubmitting}
+            className="rounded-none uppercase tracking-widest px-8"
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Ver Recomendações
           </Button>
         </div>
       </Layout>
