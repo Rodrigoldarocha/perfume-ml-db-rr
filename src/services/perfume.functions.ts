@@ -59,7 +59,7 @@ export const getPerfumeById = createServerFn({ method: "GET" })
     const { data, error } = await supabase
       .from("perfumes")
       .select("*")
-      .eq("id", id)
+      .eq("id", parseInt(id))
       .single();
 
     if (error) throw new Error(error.message);
