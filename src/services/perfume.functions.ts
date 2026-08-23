@@ -91,10 +91,9 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }).parse(data)
   )
   .handler(async ({ data }) => {
-    // 1. Geração de Candidatos (Base Completa)
-    // Filtro por Gênero
-    let query = supabase.from("perfumes").select("*");
+    // 1. Geração de Candidatos
     const targetGenero = data.genero.toLowerCase();
+    let query = supabase.from("perfumes").select("*");
     
     if (targetGenero !== 'unissex') {
       query = query.in("genero", [targetGenero as any, 'unissex']);
@@ -102,29 +101,32 @@ export const getRecommendations = createServerFn({ method: "POST" })
       query = query.eq("genero", 'unissex');
     }
 
-    const { data: candidates, error } = await query;
+    const { data: candidates, error } = await query.limit(1000);
     if (error) throw new Error(error.message);
     
+    if (!candidates || candidates.length === 0) {
+      return [];
+    }
+
     // 2. Filtros e Scores
-    const scoredPerfumes = (candidates || []).map(perfume => {
+    const targetFamilia = data.familia.toLowerCase();
+    const targetNota = data.nota.toLowerCase();
+    
+    const mapping: Record<string, string[]> = {
+      'cítrico': ['cítrico', 'aromático', 'aquático', 'fresco'],
+      'floral': ['floral', 'rosa', 'flores brancas', 'íris', 'violeta'],
+      'amadeirado': ['amadeirado', 'terroso', 'musgo', 'patchouli'],
+      'oriental': ['oriental', 'baunilha', 'doce', 'especiado', 'âmbar'],
+      'fougere': ['lavanda', 'aromático', 'verde', 'musgo']
+    };
+    const familyTerms = mapping[targetFamilia] || [targetFamilia];
+
+    const scoredPerfumes = candidates.map(perfume => {
       let score = 0;
       const motivos: string[] = [];
 
       const acordes = (perfume.acordes_principais || []).map(a => a.toLowerCase());
-      const targetFamilia = data.familia.toLowerCase();
-      
-      // Mapeamento semântico
-      const mapping: Record<string, string[]> = {
-        'cítrico': ['cítrico', 'aromático', 'aquático', 'fresco'],
-        'floral': ['floral', 'rosa', 'flores brancas', 'íris', 'violeta'],
-        'amadeirado': ['amadeirado', 'terroso', 'musgo', 'patchouli'],
-        'oriental': ['oriental', 'baunilha', 'doce', 'especiado', 'âmbar'],
-        'fougere': ['lavanda', 'aromático', 'verde', 'musgo']
-      };
-
-      const searchTerms = mapping[targetFamilia] || [targetFamilia];
-
-      if (acordes.some(a => searchTerms.includes(a))) {
+      if (acordes.some(a => familyTerms.includes(a))) {
         score += 0.5;
         motivos.push(`Alta afinidade com a família olfativa ${data.familia}`);
       }
@@ -134,7 +136,6 @@ export const getRecommendations = createServerFn({ method: "POST" })
         ...(perfume.notas_coracao || []),
         ...(perfume.notas_fundo || [])
       ].map(n => n.toLowerCase());
-      const targetNota = data.nota.toLowerCase();
 
       if (todasNotas.some(n => n.includes(targetNota) || targetNota.includes(n))) {
         score += 0.3;
@@ -145,25 +146,23 @@ export const getRecommendations = createServerFn({ method: "POST" })
       score += (perfume.avaliacao || 0) / 10;
 
       return {
-        ...(perfume as any),
-        genero: perfume.genero as any,
-        compatibilityScore: Math.min(score, 1.0),
+        ...perfume,
+        compatibilityScore: score,
         recommendationReason: motivos.length > 0 ? motivos[0] : `Ideal para ${data.ocasiao.toLowerCase()}`
       };
     });
 
-    // 3. Ordenação e Threshold
+    // 3. Ordenação e Fallback
     const threshold = 0.3;
     let finalResults = scoredPerfumes
       .filter(p => p.compatibilityScore >= threshold)
       .sort((a, b) => b.compatibilityScore - a.compatibilityScore);
 
-    // Se falhar em encontrar 3 bons, pega os top 5 candidatos independente do score
     if (finalResults.length < 3) {
       finalResults = scoredPerfumes
         .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
-        .slice(0, 5);
+        .slice(0, 8);
     }
 
-    return finalResults.slice(0, 10) as (Perfume & { compatibilityScore: number; recommendationReason: string })[];
+    return finalResults.slice(0, 12) as (Perfume & { compatibilityScore: number; recommendationReason: string })[];
   });
