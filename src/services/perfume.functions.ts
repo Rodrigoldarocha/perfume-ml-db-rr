@@ -123,11 +123,20 @@ export const getRecommendations = createServerFn({ method: "POST" })
       const acordes = (perfume.acordes_principais || []).map(a => a.toLowerCase());
       const targetFamilia = data.familia.toLowerCase();
       
-      if (acordes.includes(targetFamilia)) {
-        score += 0.4;
-        motivos.push(`Alta afinidade com a família ${data.familia}`);
-      } else if (acordes.some(a => a.includes(targetFamilia) || targetFamilia.includes(a))) {
-        score += 0.2;
+      // Mapeamento de termos do quiz para o banco
+      const mapping: Record<string, string[]> = {
+        'cítrico': ['cítrico', 'aromático', 'aquático', 'fresco'],
+        'floral': ['floral', 'rosa', 'flores brancas', 'íris', 'violeta'],
+        'amadeirado': ['amadeirado', 'terroso', 'musgo', 'patchouli'],
+        'oriental': ['oriental', 'baunilha', 'doce', 'especiado', 'âmbar'],
+        'fougere': ['lavanda', 'aromático', 'verde', 'musgo']
+      };
+
+      const searchTerms = mapping[targetFamilia] || [targetFamilia];
+
+      if (acordes.some(a => searchTerms.includes(a))) {
+        score += 0.5;
+        motivos.push(`Alta afinidade com a família olfativa ${data.familia}`);
       }
 
       const todasNotas = [
@@ -137,22 +146,14 @@ export const getRecommendations = createServerFn({ method: "POST" })
       ].map(n => n.toLowerCase());
       const targetNota = data.nota.toLowerCase();
 
-      if (todasNotas.includes(targetNota)) {
+      if (todasNotas.some(n => n.includes(targetNota) || targetNota.includes(n))) {
         score += 0.3;
         motivos.push(`Contém notas de ${data.nota} que você aprecia`);
-      } else if (todasNotas.some(n => n.includes(targetNota) || targetNota.includes(n))) {
-        score += 0.15;
       }
 
-      const acordesPesados = ['amadeirado', 'especiado', 'oriental', 'âmbar', 'couro'];
-      const acordesLeves = ['cítrico', 'aquático', 'verde', 'aromático'];
-      
-      const hasPesados = acordes.some(a => acordesPesados.includes(a));
-      const hasLeves = acordes.some(a => acordesLeves.includes(a));
+      const intensityScore = (perfume.numero_avaliacoes || 0) > 100 ? 0.1 : 0; 
+      score += intensityScore;
 
-      if (data.intensidade === "Intensa/Marcante" && hasPesados) score += 0.2;
-      if (data.intensidade === "Suave" && hasLeves) score += 0.2;
-      if (data.intensidade === "Moderada") score += 0.1;
 
       score += (perfume.avaliacao || 0) / 10;
 
