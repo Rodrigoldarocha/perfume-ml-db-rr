@@ -91,20 +91,12 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }).parse(data)
   )
   .handler(async ({ data }) => {
-    console.log("\nRECOMMENDER DEBUG");
-    console.log("-----------------");
-
     // 1. Geração de Candidatos (Base Completa)
-    const { count: totalAvailable } = await supabase.from("perfumes").select("*", { count: 'exact', head: true });
-    console.log(`Available fragrances: ${totalAvailable}`);
-
     // Filtro por Gênero
     let query = supabase.from("perfumes").select("*");
     const targetGenero = data.genero.toLowerCase();
     
     if (targetGenero !== 'unissex') {
-      // Pequeno ajuste para mapear os termos do quiz para os termos do banco se necessário
-      // O quiz usa "Masculino", "Feminino" - o banco usa "masculino", "feminino"
       query = query.in("genero", [targetGenero as any, 'unissex']);
     } else {
       query = query.eq("genero", 'unissex');
@@ -113,8 +105,6 @@ export const getRecommendations = createServerFn({ method: "POST" })
     const { data: candidates, error } = await query;
     if (error) throw new Error(error.message);
     
-    console.log(`Initial candidates (after gender): ${candidates?.length || 0}`);
-
     // 2. Filtros e Scores
     const scoredPerfumes = (candidates || []).map(perfume => {
       let score = 0;
@@ -123,7 +113,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
       const acordes = (perfume.acordes_principais || []).map(a => a.toLowerCase());
       const targetFamilia = data.familia.toLowerCase();
       
-      // Mapeamento de termos do quiz para o banco
+      // Mapeamento semântico
       const mapping: Record<string, string[]> = {
         'cítrico': ['cítrico', 'aromático', 'aquático', 'fresco'],
         'floral': ['floral', 'rosa', 'flores brancas', 'íris', 'violeta'],
@@ -151,9 +141,8 @@ export const getRecommendations = createServerFn({ method: "POST" })
         motivos.push(`Contém notas de ${data.nota} que você aprecia`);
       }
 
-      const intensityScore = (perfume.numero_avaliacoes || 0) > 100 ? 0.1 : 0; 
-      score += intensityScore;
-
+      // Recompensa popularidade/avaliação
+      score += (perfume.avaliacao || 0) / 10;
 
       return {
         ...(perfume as any),
@@ -163,27 +152,18 @@ export const getRecommendations = createServerFn({ method: "POST" })
       };
     });
 
-
     // 3. Ordenação e Threshold
-    const threshold = 0.3; // Reduzindo o threshold inicial para ser menos restritivo
+    const threshold = 0.3;
     let finalResults = scoredPerfumes
       .filter(p => p.compatibilityScore >= threshold)
       .sort((a, b) => b.compatibilityScore - a.compatibilityScore);
 
-    console.log(`After profile filters & threshold (${threshold}): ${finalResults.length}`);
-
+    // Se falhar em encontrar 3 bons, pega os top 5 candidatos independente do score
     if (finalResults.length < 3) {
-      console.log("Fallback triggered: returning top results from " + scoredPerfumes.length + " candidates...");
       finalResults = scoredPerfumes
         .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
         .slice(0, 5);
     }
-
-    const scores = finalResults.map(p => p.compatibilityScore);
-    console.log(`Min score: ${scores.length > 0 ? Math.min(...scores).toFixed(2) : 0}`);
-    console.log(`Max score: ${scores.length > 0 ? Math.max(...scores).toFixed(2) : 0}`);
-    console.log(`Final recommendations: ${finalResults.length}`);
-    console.log("-----------------\n");
 
     return finalResults.slice(0, 10) as (Perfume & { compatibilityScore: number; recommendationReason: string })[];
   });
