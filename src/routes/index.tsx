@@ -9,6 +9,7 @@ import { Search, Sparkles, MessageSquare, ShieldCheck, Mail, MapPin } from "luci
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/")({
   component: Index,
