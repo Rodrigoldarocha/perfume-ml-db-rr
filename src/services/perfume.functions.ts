@@ -103,8 +103,9 @@ export const getRecommendations = createServerFn({ method: "POST" })
     const targetGenero = data.genero.toLowerCase();
     
     if (targetGenero !== 'unissex') {
-      query = query.in("genero", [targetGenero, 'unissex']);
+      query = query.in("genero", [targetGenero as any, 'unissex']);
     } else {
+
       query = query.eq("genero", 'unissex');
     }
 
