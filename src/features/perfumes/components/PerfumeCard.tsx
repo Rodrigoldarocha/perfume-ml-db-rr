@@ -12,7 +12,12 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
   return (
     <Link to="/perfume/$id" params={{ id: perfume.id.toString() }} className="block group">
       <Card className="h-full overflow-hidden border-none shadow-sm transition-all hover:shadow-md bg-white">
-        <div className="aspect-[3/4] bg-muted flex items-center justify-center p-6 group-hover:bg-muted/80 transition-colors">
+        <div className="aspect-[3/4] bg-muted flex items-center justify-center p-6 group-hover:bg-muted/80 transition-colors relative overflow-hidden">
+          {/* Imagem decorativa com lazy loading */}
+          <div className="absolute inset-0 opacity-10 grayscale group-hover:grayscale-0 transition-all duration-700">
+             {/* Simulação de imagem - em um cenário real usaríamos perfume.imagem_url */}
+             <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
+          </div>
           <div className="text-center">
              <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground block mb-2">{perfume.marca}</span>
              <h3 className="font-serif text-lg leading-tight group-hover:text-primary transition-colors">{perfume.nome}</h3>

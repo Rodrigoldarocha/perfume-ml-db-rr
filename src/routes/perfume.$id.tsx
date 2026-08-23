@@ -1,17 +1,38 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getPerfumeById } from "@/services/perfume.functions";
 import { Layout } from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
-import { Star, ExternalLink } from "lucide-react";
+import { Star, ExternalLink, ChevronRight, Home } from "lucide-react";
+import { 
+  Breadcrumb, 
+  BreadcrumbItem, 
+  BreadcrumbLink, 
+  BreadcrumbList, 
+  BreadcrumbPage, 
+  BreadcrumbSeparator 
+} from "@/components/ui/breadcrumb";
+import { Perfume } from "@/types/perfume";
 
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
-  head: () => ({
-    meta: [
-      { title: "Detalhes do Perfume | ParfumSeg" },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const data = loaderData as unknown as Perfume;
+    return {
+      title: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "Detalhes do Perfume | ParfumSeg",
+      meta: [
+        { name: "description", content: data ? `Descubra as notas de ${data.nome} da ${data.marca}. Acordes: ${data.acordes_principais.join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
+        { property: "og:title", content: data ? `${data.nome} - ${data.marca} | Pirâmide Olfativa` : "ParfumSeg | Catálogo de Perfumes" },
+        { property: "og:description", content: data ? `Explore a composição detalhada e encontre fragrâncias parecidas com ${data.nome}.` : "Explore 24.000+ fragrâncias traduzidas." },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" }
+      ]
+    };
+  },
+  loader: async ({ params }) => {
+    const { getPerfumeById } = await import("@/services/perfume.functions");
+    return getPerfumeById({ data: params.id });
+  }
 });
 
 function PerfumeDetail() {
@@ -23,10 +44,39 @@ function PerfumeDetail() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
+        <Breadcrumb className="mb-8">
+          <BreadcrumbList className="uppercase tracking-[0.2em] text-[10px]">
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/" className="flex items-center gap-1"><Home className="w-3 h-3" /> Início</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <ChevronRight className="w-3 h-3" />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">Catálogo</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <ChevronRight className="w-3 h-3" />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-primary font-medium">{perfume.nome}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           {/* Image Placeholder Area */}
-          <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5">
+          <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5 relative overflow-hidden group/img">
+            {/* Imagem principal do perfume */}
+            <div className="absolute inset-0 opacity-20 grayscale-0 group-hover/img:scale-105 transition-transform duration-1000">
+               {/* Simulação de imagem - em um cenário real usaríamos perfume.imagem_url */}
+               <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
+            </div>
             <div className="text-center">
               <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
               <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
@@ -129,9 +179,9 @@ function PerfumeDetail() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {perfume.top5_similares.map((nomeSimilar) => (
-                <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm">
+                <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm group hover:shadow-md transition-shadow">
                   <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Similar</span>
-                  <h4 className="font-serif text-sm uppercase tracking-wider">{nomeSimilar}</h4>
+                  <h4 className="font-serif text-sm uppercase tracking-wider group-hover:text-primary transition-colors">{nomeSimilar}</h4>
                 </div>
               ))}
             </div>
