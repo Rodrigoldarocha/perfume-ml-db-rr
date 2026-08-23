@@ -1,3 +1,4 @@
+nao esta
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getPerfumes } from "@/services/perfume.functions";
