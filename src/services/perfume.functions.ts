@@ -91,7 +91,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }).parse(data)
   )
   .handler(async ({ data }) => {
-    console.log("\nRECOMMENDER DEBUG");
+    fs.appendFileSync("/tmp/recommender.log", "\nRECOMMENDER DEBUG\n"); const fs = require("fs");
     console.log("-----------------");
 
     // 1. Geração de Candidatos (Base Completa)
