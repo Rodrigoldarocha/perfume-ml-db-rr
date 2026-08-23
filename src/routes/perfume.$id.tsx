@@ -17,7 +17,7 @@ import { Perfume } from "@/types/perfume";
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
   head: ({ loaderData }) => {
-    const data = loaderData as Perfume;
+    const data = loaderData as unknown as Perfume;
     return {
       title: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "Detalhes do Perfume | ParfumSeg",
       meta: [
