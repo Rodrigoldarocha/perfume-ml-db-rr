@@ -5,6 +5,7 @@ export const Route = createFileRoute("/privacidade")({
   component: Privacy,
   head: () => ({
     title: "Política de Privacidade | ParfumSeg",
+    meta: [{ name: "description", content: "Nossa política de privacidade e termos de uso." }]
   })
 });
 
