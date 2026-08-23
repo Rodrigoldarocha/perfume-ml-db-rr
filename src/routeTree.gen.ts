@@ -14,6 +14,7 @@ import { Route as AgradecimentoRouteImport } from './routes/agradecimento'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as RecomendacoesRouteImport } from './routes/recomendacoes'
 import { Route as PerfumeIdRouteImport } from './routes/perfume.$id'
 import { Route as RobotsTxtRouteImport } from './routes/robots.txt'
 import { Route as SitemapXmlRouteImport } from './routes/sitemap.xml'
@@ -43,6 +44,11 @@ const QuizRoute = QuizRouteImport.update({
   path: '/quiz',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecomendacoesRoute = RecomendacoesRouteImport.update({
+  id: '/recomendacoes',
+  path: '/recomendacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfumeIdRoute = PerfumeIdRouteImport.update({
   id: '/perfume/$id',
   path: '/perfume/$id',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/quiz': typeof QuizRoute
+  '/recomendacoes': typeof RecomendacoesRoute
   '/perfume/$id': typeof PerfumeIdRoute
   '/robots/txt': typeof RobotsTxtRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/quiz': typeof QuizRoute
+  '/recomendacoes': typeof RecomendacoesRoute
   '/perfume/$id': typeof PerfumeIdRoute
   '/robots/txt': typeof RobotsTxtRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/privacidade': typeof PrivacidadeRoute
   '/quiz': typeof QuizRoute
+  '/recomendacoes': typeof RecomendacoesRoute
   '/perfume/$id': typeof PerfumeIdRoute
   '/robots/txt': typeof RobotsTxtRoute
   '/sitemap/xml': typeof SitemapXmlRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/privacidade'
     | '/quiz'
+    | '/recomendacoes'
     | '/perfume/$id'
     | '/robots/txt'
     | '/sitemap/xml'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/privacidade'
     | '/quiz'
+    | '/recomendacoes'
     | '/perfume/$id'
     | '/robots/txt'
     | '/sitemap/xml'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/contato'
     | '/privacidade'
     | '/quiz'
+    | '/recomendacoes'
     | '/perfume/$id'
     | '/robots/txt'
     | '/sitemap/xml'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   QuizRoute: typeof QuizRoute
+  RecomendacoesRoute: typeof RecomendacoesRoute
   PerfumeIdRoute: typeof PerfumeIdRoute
   RobotsTxtRoute: typeof RobotsTxtRoute
   SitemapXmlRoute: typeof SitemapXmlRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuizRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recomendacoes': {
+      id: '/recomendacoes'
+      path: '/recomendacoes'
+      fullPath: '/recomendacoes'
+      preLoaderRoute: typeof RecomendacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfume/$id': {
       id: '/perfume/$id'
       path: '/perfume/$id'
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   QuizRoute: QuizRoute,
+  RecomendacoesRoute: RecomendacoesRoute,
   PerfumeIdRoute: PerfumeIdRoute,
   RobotsTxtRoute: RobotsTxtRoute,
   SitemapXmlRoute: SitemapXmlRoute,

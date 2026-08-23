@@ -63,17 +63,18 @@ function Quiz() {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
-      // @ts-ignore - a rota será gerada após o salvamento do arquivo
+      // @ts-ignore
       await navigate({
         to: "/recomendacoes",
         search: {
-          genero: answers[0],
-          familia: answers[1],
-          ocasiao: answers[2],
-          intensidade: answers[3],
-          nota: answers[4],
+          genero: answers[0] || "Unissex",
+          familia: answers[1] || "Floral",
+          ocasiao: answers[2] || "Dia a dia",
+          intensidade: answers[3] || "Moderada",
+          nota: answers[4] || "Limão",
         }
       });
+
     } catch (error) {
       console.error(error);
       toast.error("Ocorreu um erro ao processar suas recomendações.");
