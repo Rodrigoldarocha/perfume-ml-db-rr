@@ -27,7 +27,7 @@ export const getPerfumes = createServerFn({ method: "GET" })
       query = query.eq("marca", data.marca);
     }
     if (data.genero) {
-      query = query.eq("genero", data.genero);
+      query = query.eq("genero", data.genero as any);
     }
     if (data.acordo) {
       query = query.contains("acordes_principais", [data.acordo]);
