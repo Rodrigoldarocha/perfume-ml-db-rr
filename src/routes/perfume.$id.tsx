@@ -71,7 +71,12 @@ function PerfumeDetail() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           {/* Image Placeholder Area */}
-          <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5">
+          <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5 relative overflow-hidden group/img">
+            {/* Imagem principal do perfume */}
+            <div className="absolute inset-0 opacity-20 grayscale-0 group-hover/img:scale-105 transition-transform duration-1000">
+               {/* Simulação de imagem - em um cenário real usaríamos perfume.imagem_url */}
+               <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
+            </div>
             <div className="text-center">
               <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
               <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
