@@ -125,8 +125,9 @@ async function seed() {
   });
 
   // 3. Clustering (k-means)
-  console.log("Running K-Means clustering (k=12)...");
-  const result = kmeans(vectors, 12, { seed: 42 });
+  const k = Math.min(12, perfumes.length);
+  console.log(`Running K-Means clustering (k=${k})...`);
+  const result = kmeans(vectors, k, { seed: 42 });
   const clusters = result.clusters;
 
   // 4. Similarity (Cosine Similarity for Top 5)
@@ -170,7 +171,7 @@ async function seed() {
   // 5. Cluster Profiles
   console.log("Generating cluster profiles...");
   const clusterProfiles: Record<number, string> = {};
-  for (let c = 0; c < 12; c++) {
+  for (let c = 0; c < k; c++) {
     const clusterPerfumes = perfumes.filter((p: any) => p.cluster === c);
     const accordCounts: Record<string, number> = {};
     clusterPerfumes.forEach((p: any) => {
