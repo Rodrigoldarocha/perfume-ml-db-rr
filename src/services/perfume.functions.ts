@@ -165,7 +165,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
     console.log(`After profile filters & threshold (${threshold}): ${finalResults.length}`);
 
     if (finalResults.length < 3) {
-      console.log("Fallback triggered: returning top results...");
+      console.log("Fallback triggered: returning top results from " + scoredPerfumes.length + " candidates...");
       finalResults = scoredPerfumes
         .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
         .slice(0, 5);
