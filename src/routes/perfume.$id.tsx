@@ -149,7 +149,7 @@ function PerfumeDetail() {
               <div className="pt-6 border-t border-primary/10">
                 <div className="flex flex-col gap-2">
                    <p className="text-xs font-light text-muted-foreground uppercase tracking-widest">
-                     Perfumista(s): {perfume.perfumista_1}{perfume.perfumista_2 ? `, ${perfume.perfumista_2}` : ""}
+                     Perfumista(s): {perfume.perfumista_1}{perfume.perfumista_2 ? `, ${perfume.perfumista_2}` : ""}{!perfume.perfumista_1 && !perfume.perfumista_2 ? "Informação não disponível" : ""}
                    </p>
                    {perfume.cluster_perfil && (
                      <p className="text-xs font-light text-muted-foreground uppercase tracking-widest">

@@ -95,7 +95,7 @@ function Index() {
       <div className="container mx-auto px-4 pb-20">
         <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-4">
           <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium">
-            {data.total} Fragrâncias encontradas
+            {data.total} {data.total === 1 ? "Fragrância encontrada" : "Fragrâncias encontradas"}
           </h3>
         </div>
 
