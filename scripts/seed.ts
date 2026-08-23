@@ -126,8 +126,8 @@ async function seed() {
 
   // 3. Clustering (k-means)
   console.log("Running K-Means clustering (k=12)...");
-  const kmeans = new KMeans(vectors, 12, { seed: 42 });
-  const clusters = kmeans.clusters;
+  const result = kmeans(vectors, 12, { seed: 42 });
+  const clusters = result.clusters;
 
   // 4. Similarity (Cosine Similarity for Top 5)
   console.log("Calculating Top 5 similarities...");
