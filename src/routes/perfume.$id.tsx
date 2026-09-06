@@ -88,10 +88,6 @@ function PerfumeDetail() {
                 <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
               </div>
             )}
-            <div className="text-center relative z-10">
-              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
-              <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
-            </div>
           </div>
 
           {/* Info Area */}
