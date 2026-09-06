@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getPerfumeById } from "@/services/perfume.functions";
@@ -41,6 +42,8 @@ function PerfumeDetail() {
     queryKey: ["perfume", id],
     queryFn: () => getPerfumeById({ data: id }),
   });
+  const [imgOk, setImgOk] = useState(Boolean(perfume.imagem_url));
+
 
   return (
     <Layout>
@@ -72,19 +75,27 @@ function PerfumeDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           {/* Image Placeholder Area */}
           <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5 relative overflow-hidden group/img">
-            {/* Imagem principal do perfume */}
-            <div className="absolute inset-0 opacity-20 grayscale-0 group-hover/img:scale-105 transition-transform duration-1000">
-               {/* Simulação de imagem - em um cenário real usaríamos perfume.imagem_url */}
-               <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
-            </div>
-            <div className="text-center">
-              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
-              <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
-            </div>
+            {/* Foto real do frasco, com degradê decorativo como fallback */}
+            {perfume.imagem_url && imgOk ? (
+              <img
+                src={perfume.imagem_url}
+                alt={`${perfume.marca} ${perfume.nome}`}
+                onError={() => setImgOk(false)}
+                className="absolute inset-0 w-full h-full object-contain p-8 group-hover/img:scale-[1.04] transition-transform duration-1000"
+              />
+            ) : (
+              <div className="absolute inset-0 opacity-20 grayscale-0 transition-transform duration-1000">
+                <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
+              </div>
+            )}
           </div>
 
           {/* Info Area */}
           <div className="flex flex-col">
+            <div className="mb-8">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
+              <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
+            </div>
             <div className="mb-8 border-b border-primary/10 pb-6">
               <div className="flex items-center justify-between mb-4">
                 <Badge variant="outline" className="rounded-none uppercase tracking-widest font-light border-primary/20">
