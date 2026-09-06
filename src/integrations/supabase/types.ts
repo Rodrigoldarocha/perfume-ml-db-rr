@@ -83,30 +83,6 @@ export type Database = {
         }
         Relationships: []
       }
-      contato_mensagens: {
-        Row: {
-          id: number
-          nome: string
-          email: string
-          mensagem: string
-          created_at: string
-        }
-        Insert: {
-          id?: number
-          nome: string
-          email: string
-          mensagem: string
-          created_at?: string
-        }
-        Update: {
-          id?: number
-          nome?: string
-          email?: string
-          mensagem?: string
-          created_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
