@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      contato_mensagens: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          mensagem: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: never
+          mensagem: string
+          nome: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: never
+          mensagem?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       perfumes: {
         Row: {
           acordes_principais: string[]
