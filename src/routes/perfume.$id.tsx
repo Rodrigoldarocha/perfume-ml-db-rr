@@ -42,6 +42,8 @@ function PerfumeDetail() {
     queryKey: ["perfume", id],
     queryFn: () => getPerfumeById({ data: id }),
   });
+  const [imgOk, setImgOk] = useState(Boolean(perfume.imagem_url));
+
 
   return (
     <Layout>
