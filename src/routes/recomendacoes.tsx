@@ -5,15 +5,9 @@ import { PerfumeCard } from "@/features/perfumes/components/PerfumeCard";
 import { Layout } from "@/components/Layout";
 import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { z } from "zod";
+import { recommendationSearchSchema } from "@/lib/quiz";
 
-const searchSchema = z.object({
-  genero: z.string().catch("Unissex"),
-  familia: z.string().catch("Floral"),
-  ocasiao: z.string().catch("Dia a dia"),
-  intensidade: z.string().catch("Moderada"),
-  nota: z.string().catch("Limão"),
-});
+const searchSchema = recommendationSearchSchema;
 
 export const Route = createFileRoute("/recomendacoes")({
   component: Recomendacoes,

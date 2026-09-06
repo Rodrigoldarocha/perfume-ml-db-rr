@@ -1,9 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { QUIZ_STEPS, answersToSearch } from "@/lib/quiz";
 
 export const Route = createFileRoute("/quiz")({
   component: Quiz,
@@ -18,30 +19,8 @@ export const Route = createFileRoute("/quiz")({
   }),
 });
 
-const steps = [
-  {
-    title: "Qual o seu gênero de preferência?",
-    options: ["Masculino", "Feminino", "Unissex"],
-  },
-  {
-    title: "Qual família olfativa você mais gosta?",
-    options: ["Cítrico", "Floral", "Amadeirado", "Oriental", "Fougere"],
-  },
-  {
-    title: "Para qual ocasião você procura o perfume?",
-    options: ["Dia a dia", "Trabalho", "Noite/Festas", "Encontros"],
-  },
-  {
-    title: "Qual a intensidade desejada?",
-    options: ["Suave", "Moderada", "Intensa/Marcante"],
-  },
-  {
-    title: "Quais notas você prefere?",
-    options: ["Baunilha", "Lavanda", "Sândalo", "Rosa", "Limão"],
-  },
-];
-
 function Quiz() {
+  const steps = QUIZ_STEPS;
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [isFinished, setIsFinished] = useState(false);
@@ -63,16 +42,9 @@ function Quiz() {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
-      // @ts-ignore
       await navigate({
         to: "/recomendacoes",
-        search: {
-          genero: answers[0] || "Unissex",
-          familia: answers[1] || "Floral",
-          ocasiao: answers[2] || "Dia a dia",
-          intensidade: answers[3] || "Moderada",
-          nota: answers[4] || "Limão",
-        }
+        search: answersToSearch(answers),
       });
 
     } catch (error) {
