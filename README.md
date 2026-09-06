@@ -1,224 +1,191 @@
-# ParfumSeg — Catálogo & Recomendador de Perfumes em PT-BR
+# 🌸 ParfumSeg — Catálogo & Recomendador de Perfumes
 
-> Sua essência, nossa ciência. Catálogo com milhares de fragrâncias traduzidas,
-> pirâmide olfativa completa e recomendador inteligente por quiz.
+React TypeScript TanStack Start Tailwind CSS Supabase
+
+Catálogo de perfumes em português com quiz olfativo e recomendador inteligente.
+
+A aplicação centraliza busca, filtros, pirâmide olfativa, fragrâncias similares e
+recomendações personalizadas em uma interface responsiva para web e dispositivos móveis.
 
 **Live app:** https://perfume-ml-db-rr.lovable.app
 
----
+## ✨ Funcionalidades
 
-## Índice
+- 🔎 Busca instantânea com debounce e paginação infinita
+- 🏷️ Filtros por marca, gênero e acorde
+- 🧭 Quiz olfativo em 5 passos (gênero, família, ocasião, intensidade, nota)
+- 🎯 Até 15 recomendações com motivo por card
+- 🌸 Pirâmide olfativa completa (saída, coração, fundo)
+- 🔗 Fragrâncias similares clicáveis
+- 🌓 Tokens em oklch com suporte a tema escuro
+- 📱 Interface responsiva com alvos touch de 44px
+- ♿ Skip link, `aria-live` no quiz e foco visível
+- 🗺️ Sitemap dinâmico + `robots.txt`
+- 💾 Cache de queries para melhorar a disponibilidade
 
-- [Visão geral](#visão-geral)
-- [Jornadas do usuário](#jornadas-do-usuário)
-- [Stack](#stack)
-- [Arquitetura](#arquitetura)
-- [Como o recomendador funciona](#como-o-recomendador-funciona)
-- [Pipeline de dados e ML](#pipeline-de-dados-e-ml)
-- [Desenvolvimento local](#desenvolvimento-local)
-- [Variáveis de ambiente](#variáveis-de-ambiente)
-- [Scripts](#scripts)
-- [Testes](#testes)
-- [Banco de dados (Supabase)](#banco-de-dados-supabase)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [SEO e performance](#seo-e-performance)
-- [Acessibilidade](#acessibilidade)
-- [Roadmap](#roadmap)
-- [Créditos](#créditos)
+## 🛠️ Tecnologias
 
----
+- React 19
+- TypeScript
+- TanStack Start (SSR)
+- TanStack Router
+- TanStack Query
+- Tailwind CSS v4
+- shadcn/ui
+- Zod
+- Supabase (Postgres + PostgREST + RLS)
+- Python (TF-IDF + K-Means + similaridade por cosseno)
+- Bun (testes)
 
-## Visão geral
-
-ParfumSeg é um catálogo de perfumes em português com:
-
-- **Explorar** — busca instantânea com debounce, paginação infinita e cards com foto,
-  avaliação e acordes principais.
-- **Descobrir (quiz)** — 5 perguntas (gênero, família olfativa, ocasião, intensidade,
-  nota favorita) que geram uma *assinatura olfativa* com até 15 recomendações e motivo.
-- **Detalhe** — pirâmide olfativa (saída/coração/fundo), acordes, perfumista,
-  perfil de cluster e **fragrâncias similares clicáveis**.
-- **Contato** — formulário com confirmação em página de agradecimento.
-
-## Jornadas do usuário
-
-```
-Explorar:  / ──busca──▶ grid paginado ──clique──▶ /perfume/$id
-Descobrir: /quiz (5 passos) ──search params──▶ /recomendacoes ──clique──▶ /perfume/$id
-Contato:   /contato ──envio──▶ /agradecimento
-```
-
-## Stack
-
-| Camada      | Tecnologia                                              |
-|-------------|---------------------------------------------------------|
-| App         | TanStack Start (SSR), React 19, TanStack Router + Query |
-| UI          | Tailwind CSS v4 (tokens oklch), shadcn/ui, lucide-react |
-| Dados       | Supabase (Postgres + PostgREST + RLS)                   |
-| Validação   | Zod (client + server)                                   |
-| ML offline  | Python (TF-IDF + K-Means esférico + cosseno), `ml-kmeans` (legado) |
-| Testes      | `bun test` (sem dependências extras)                    |
-| Deploy      | Lovable Cloud (`main` sincroniza sozinho)               |
-
-## Arquitetura
+## 📁 Estrutura
 
 ```
 src/
-├── lib/                 # Lógica pura, sem I/O (testável)
-│   ├── text.ts          # normalizePt, escapeLike
-│   ├── quiz.ts          # QUIZ_STEPS, QUIZ_DEFAULTS, schema, answersToSearch
-│   └── recommendation.ts# scoring + ranking (pesos, threshold, fallback)
+├── components/
+│   ├── Layout.tsx
+│   └── ui/
+├── data/
+│   └── faqs.ts
+├── features/
+│   └── perfumes/
+│       └── components/
+│           └── PerfumeCard.tsx
+├── hooks/
+├── integrations/
+│   └── supabase/
+├── lib/
+│   ├── quiz.ts
+│   ├── recommendation.ts
+│   └── text.ts
+├── routes/
+│   ├── index.tsx
+│   ├── quiz.tsx
+│   ├── recomendacoes.tsx
+│   ├── perfume.$id.tsx
+│   ├── contato.tsx
+│   ├── agradecimento.tsx
+│   └── privacidade.tsx
 ├── services/
-│   └── perfume.functions.ts  # Server functions finas (validação zod + Supabase)
-├── routes/              # / , /quiz, /recomendacoes, /perfume/$id, /contato, ...
-├── features/perfumes/   # PerfumeCard
-├── components/          # Layout (skip link, nav, footer), ui/*
-├── data/faqs.ts         # Conteúdo da home
-└── integrations/supabase/ # clients + middleware (gerados, não editar)
-
+│   └── perfume.functions.ts
+├── types/
+│   └── perfume.ts
+└── styles.css
 scripts/
-├── process_dataset.py   # Pipeline oficial: TF-IDF → K-Means → top5 → CSV
-├── upload_dataset.py    # Upsert idempotente (on_conflict=nome,marca)
-├── seed.ts              # Legado TS, bloqueado acima de 2000 itens (O(n²))
-└── seed_dry_run.ts      # Checagem de dataset
-
-tests/                   # bun test (text, quiz, recommendation)
-supabase/migrations/     # Schema + RLS (leitura pública, escrita só service_role)
+├── process_dataset.py
+├── upload_dataset.py
+├── seed.ts
+└── seed_dry_run.ts
+tests/
+├── quiz.test.ts
+├── recommendation.test.ts
+└── text.test.ts
+supabase/
+└── migrations/
 ```
 
-Princípios: handlers finos, regra de negócio em `lib/` pura, fonte única
-(`quiz.ts`) para steps/defaults/schema, validação na borda (zod) antes do banco.
+## 🚀 Instalação
 
-## Como o recomendador funciona
+### Requisitos
 
-1. **Candidatos** — `resolveGenero` valida por allowlist (fallback `unissex`, nunca
-   quebra o enum do banco). `unissex` = sem filtro; específico = específico + unissex.
-   Busca ordenada por avaliação + nº de avaliações, `limit 1000` determinístico.
-2. **Score** — `+0.5` afinidade de família (`FAMILY_MAP` normalizado sem acentos),
-   `+0.3` nota favorita (mínimo 3 letras, match unilateral), `+0.15` ocasião
-   (`OCCASION_MAP`), `+0.15` intensidade (`INTENSITY_MAP`), `+avaliação/10`.
-3. **Rank** — filtra `score >= 0.3`, ordena desc, top 15. Fallback top 15 se
-   menos de 3 passarem no threshold. Motivo exibido por card.
+- Node.js 22+ ou Bun
+- npm ou Bun
+- Projeto Supabase (URL + chaves)
 
-Pesos e limites vivem em `src/lib/recommendation.ts` — ajuste fino sem tocar em I/O.
-
-## Pipeline de dados e ML
-
-```sh
-# 1. Processa dataset bruto → CSV com cluster, cluster_perfil, top5_similares
-python scripts/process_dataset.py ./perfumes_ptbr.json /tmp/perfumes_processed.csv
-
-# 2. Confere sem enviar
-python scripts/upload_dataset.py /tmp/perfumes_processed.csv --dry-run
-
-# 3. Upsert idempotente (nunca DELETE full-table)
-SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
-  python scripts/upload_dataset.py /tmp/perfumes_processed.csv
-```
-
-Detalhes do `process_dataset.py`: TF-IDF ponderado (saída ×1, coração/fundo ×2,
-acordes ×3, tokens normalizados NFKD), K-Means esférico (cosseno, `k ≤ 12`,
-seed 42), similaridade por cosseno em blocos de 512, CSV pronto para COPY/upsert.
-
-## Desenvolvimento local
-
-Pré-requisitos: [Bun](https://bun.sh) (ou Node 22 + npm) e um projeto Supabase.
+### Configuração
 
 ```sh
 git clone https://github.com/Rodrigoldarocha/perfume-ml-db-rr.git
 cd perfume-ml-db-rr
-bun install   # ou: npm i
-bun run dev   # ou: npm run dev
+
+npm install
+cp .env.example .env
 ```
 
-Build e preview:
+Configure o `.env`:
 
 ```sh
-bun run build
-bun run preview
+VITE_SUPABASE_URL=sua_url
+VITE_SUPABASE_PUBLISHABLE_KEY=sua_chave_publica
+SUPABASE_URL=sua_url
+SUPABASE_PUBLISHABLE_KEY=sua_chave_publica
+SUPABASE_SERVICE_ROLE_KEY=sua_chave_service_role
 ```
 
-## Variáveis de ambiente
+⚠️ Variáveis `VITE_*` ficam disponíveis no frontend. A `SUPABASE_SERVICE_ROLE_KEY`
+bypassa o RLS — use somente nos scripts locais, nunca no client.
 
-> Nunca commite `.env` — está no `.gitignore`. Se vazar, rotacione as chaves.
+## ▶️ Executando
 
-| Variável                      | Onde usa        | Exemplo |
-|-------------------------------|-----------------|---------|
-| `VITE_SUPABASE_URL`           | client (Vite)   | `https://xyz.supabase.co` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | client (anon) | `sb_publishable_...` |
-| `SUPABASE_URL`                | server / scripts| `https://xyz.supabase.co` |
-| `SUPABASE_PUBLISHABLE_KEY`    | server          | `sb_publishable_...` |
-| `SUPABASE_SERVICE_ROLE_KEY`   | scripts (admin) | **só local/CI, nunca no client** |
-
-## Scripts
-
-| Comando          | O que faz                              |
-|------------------|----------------------------------------|
-| `bun run dev`    | Dev SSR com HMR                        |
-| `bun run build`  | Build de produção                      |
-| `bun run preview`| Serve o build                          |
-| `bun run lint`   | ESLint (nota: quebra com TS 7 — pré-existente, ver `ui/*`) |
-| `bun run format` | Prettier                               |
-| `bun run test`   | `bun test tests` — 25 testes verdes    |
-
-## Testes
+Desenvolvimento:
 
 ```sh
-bun run test
+npm run dev
 ```
 
-Cobertura (feliz + borda): normalização/escape (`text`), steps/defaults/schema do
-quiz, allowlist de gênero (inclui tentativa de injeção), scoring (família/nota/rating),
-threshold/fallback/teto do ranking, arrays nulos e dataset vazio. Lógica pura em
-`src/lib/` = isolamento total de I/O.
+Build:
 
-## Banco de dados (Supabase)
+```sh
+npm run build
+```
 
-Tabela `public.perfumes`: `id`, `nome`, `marca` (única `nome+marca`), `pais_origem`,
-`genero` (enum `masculino|feminino|unissex`), `avaliacao`, `numero_avaliacoes`,
-`ano_lancamento`, `notas_saida|coracao|fundo[]`, `acordes_principais[]`,
-`perfumista_1|2`, `url_fonte`, `cluster`, `cluster_perfil`, `top5_similares[]`,
-`imagem_url`, `created_at`.
+Preview:
 
-RLS: `SELECT` público (anon + authenticated), escritas só `service_role`
+```sh
+npm run preview
+```
+
+Testes:
+
+```sh
+npm run test
+```
+
+Lint:
+
+```sh
+npm run lint
+```
+
+## 🧠 Recomendador
+
+O score combina família olfativa (`+0.5`), nota favorita (`+0.3`), ocasião (`+0.15`),
+intensidade (`+0.15`) e avaliação (`+avaliação/10`), com threshold `0.3` e fallback
+para 15 resultados. Pesos e mapas vivem em `src/lib/recommendation.ts`.
+
+## 📊 Dados e ML
+
+Pipeline oficial em Python:
+
+```sh
+python scripts/process_dataset.py ./perfumes_ptbr.json /tmp/perfumes_processed.csv
+python scripts/upload_dataset.py /tmp/perfumes_processed.csv --dry-run
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
+  python scripts/upload_dataset.py /tmp/perfumes_processed.csv
+```
+
+O upsert é idempotente (`on_conflict=nome,marca`) — nunca apaga o catálogo.
+O `scripts/seed.ts` legado é bloqueado acima de 2000 itens (complexidade O(n²)).
+
+## 🔐 Segurança
+
+Não versionar arquivos `.env` ou credenciais no Git (o `.gitignore` já cobre `.env`).
+
+Utilize `.env.example` para documentar as variáveis necessárias.
+
+Leituras do catálogo são públicas via RLS; escritas somente com `service_role`
 (migration `20260907000000_revoke_perfumes_write.sql`).
 
-Listagem usa select enxuto (`id,nome,marca,genero,avaliacao,acordes,imagem`) para
-payload leve; detalhe/recomendação usam linha completa.
+## 👨‍💻 Autor
 
-## Estrutura do projeto
+Rodrigo Rocha — [GitHub](https://github.com/Rodrigoldarocha) ·
+[LinkedIn](https://www.linkedin.com/in/rodrigo-rocha-19249170/)
 
-Ver [Arquitetura](#arquitetura). Rotas em `src/routes/` (TanStack file-router),
-sitemap dinâmico em `/sitemap.xml` (estáticas + top 500 por avaliações, com fallback
-estático sem env), `robots.txt` correspondente.
+## 📄 Licença e Créditos
 
-## SEO e performance
+Desenvolvido por: Rodrigo Rocha
+Projeto: ParfumSeg — Catálogo & Recomendador de Perfumes
 
-- Metas OG/Twitter por rota + detalhe dinâmico (nome, marca, acordes).
-- `staleTime`/`gcTime` no Query (listagem 60s/5min, detalhe 5min/30min) — menos refetch.
-- Imagens `loading="lazy"`, `decoding="async"`, containers com aspect-ratio (sem CLS).
-- Micro-interação `animate-rise` com stagger e `prefers-reduced-motion` respeitado.
-- Foco visível global, `::selection` com acento.
+Dados de perfumes: Fragrantica.com, via Kaggle (`olgagmiufana1`), traduzidos para PT-BR.
+Imagens ilustrativas quando presentes.
 
-## Acessibilidade
-
-- `lang="pt-BR"`, skip link "Pular para o conteúdo", `nav` com `aria-label`.
-- Navegação visível no mobile (antes oculta), alvos touch `min-h-[44px]`.
-- Motivo da recomendação sempre visível no mobile (antes só hover).
-- Tipografia fluida (`clamp`) no hero, sem scroll horizontal.
-
-## Roadmap
-
-- [ ] Busca por marca/acorde na UI (backend já filtra)
-- [ ] Persistir contato (tabela Supabase ou e-mail)
-- [ ] Auth + favoritos/coleções
-- [ ] Imagens WebP/AVIF com `srcset` e CDN
-- [ ] Testes E2E do fluxo quiz → recomendações
-- [ ] Virtualização para catálogos gigantes
-
-## Créditos
-
-Dados originais: Fragrantica.com, via Kaggle (`olgagmiufana1`), traduzidos para PT-BR.
-Imagens ilustrativas quando presentes. Projeto conectado ao
-[Lovable](https://lovable.dev) — push em `main` sincroniza o editor (sem force-push,
-sem rebase de histórico publicado).
+ParfumSeg · Sua essência, nossa ciência
