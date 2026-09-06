@@ -84,6 +84,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "theme-color", content: "#35322e" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "ParfumSeg" },
     ],
     links: [
       {
@@ -91,13 +96,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
+  pendingComponent: PendingComponent,
+  pendingMinMs: 350,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
+
+function PendingComponent() {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 bg-background px-4">
+      <span className="font-serif text-2xl uppercase tracking-[0.1em] text-primary">
+        ParfumSeg
+      </span>
+      <div className="boot-bar" aria-hidden="true">
+        <span />
+      </div>
+      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+        Carregando…
+      </p>
+    </div>
+  );
+}
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -106,6 +132,14 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <div id="boot-splash" aria-hidden="true">
+          <span style={{ fontFamily: "Georgia, serif", fontSize: "1.75rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            ParfumSeg
+          </span>
+          <div className="boot-bar">
+            <span />
+          </div>
+        </div>
         {children}
         <Scripts />
       </body>
@@ -115,6 +149,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    const splash = document.getElementById("boot-splash");
+    if (!splash) return;
+    splash.classList.add("hide");
+    const t = window.setTimeout(() => splash.remove(), 400);
+    return () => window.clearTimeout(t);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

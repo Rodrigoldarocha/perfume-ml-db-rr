@@ -19,6 +19,7 @@ recomendações personalizadas em uma interface responsiva para web e dispositiv
 - 🔗 Fragrâncias similares clicáveis
 - 🌓 Tokens em oklch com suporte a tema escuro
 - 📱 Interface responsiva com alvos touch de 44px
+- 📲 Instalável como PWA (ícone + splash)
 - ♿ Skip link, `aria-live` no quiz e foco visível
 - 🗺️ Sitemap dinâmico + `robots.txt`
 - 💾 Cache de queries para melhorar a disponibilidade
@@ -172,6 +173,14 @@ SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 
 O upsert é idempotente (`on_conflict=nome,marca`) — nunca apaga o catálogo.
 O `scripts/seed.ts` legado é bloqueado acima de 2000 itens (complexidade O(n²)).
+
+## 📲 PWA
+
+O app pode ser instalado na tela inicial em dispositivos compatíveis
+(manifest + ícones 192/512/maskable + splash de abertura).
+
+- Android: Chrome → Menu → Instalar aplicativo
+- iOS: Safari → Compartilhar → Adicionar à Tela de Início
 
 ## 🔐 Segurança
 
