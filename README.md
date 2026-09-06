@@ -148,9 +148,16 @@ npm run lint
 
 ## 🧠 Recomendador
 
-O score combina família olfativa (`+0.5`), nota favorita (`+0.3`), ocasião (`+0.15`),
-intensidade (`+0.15`) e avaliação (`+avaliação/10`), com threshold `0.3` e fallback
-para 15 resultados. Pesos e mapas vivem em `src/lib/recommendation.ts`.
+1. **Candidatos** — gênero por allowlist (`unissex` = sem filtro), ordenados por
+   avaliação, `limit 1000` determinístico.
+2. **Score** — família (`+0.5`), nota favorita (`+0.3`), ocasião (`+0.15`),
+   intensidade (`+0.15`) e prior de popularidade (`+avaliação/10 × 0.3`, teto `0.15`).
+   Tudo passa por normalização única (sem acentos + dicionário de sinônimos EN→PT).
+3. **Âncora + expansão** — top 3 viram âncoras; seus `top5_similares` (ML offline)
+   entram na sequência, mesmo abaixo do threshold.
+4. **MMR** (`λ=0.7`) — fecha 15 resultados diversos em vez de 15 clones.
+
+Pesos, mapas e tetos vivem em `src/lib/recommendation.ts`.
 
 ## 📊 Dados e ML
 

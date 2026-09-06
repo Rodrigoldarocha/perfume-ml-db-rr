@@ -4,6 +4,7 @@ import {
   FALLBACK_COUNT,
   MAX_RESULTS,
   matchGenero,
+  mmrSelect,
   rankRecommendations,
   resolveFamilyTerms,
   resolveGenero,
@@ -86,8 +87,32 @@ describe("scoreCandidate", () => {
       { genero: "feminino", familia: "Floral", ocasiao: "Trabalho", intensidade: "Moderada", nota: "rosa" },
       ["floral", "rosa"],
     );
-    expect(s.compatibilityScore).toBeCloseTo(0.5 + 0.3 + 0.4, 5);
+    expect(s.compatibilityScore).toBeCloseTo(0.5 + 0.3 + 0.12, 5);
     expect(s.recommendationReason).toContain("Floral");
+  });
+
+  test("sinônimos: Rose casa com rosa, citrus com cítrico", () => {
+    const p = makePerfume({
+      acordes_principais: ["citrus"],
+      notas_coracao: ["Rose"],
+      avaliacao: 0,
+    });
+    const s = scoreCandidate(
+      p,
+      { genero: "unissex", familia: "Cítrico", ocasiao: "Trabalho", intensidade: "Moderada", nota: "rosa" },
+      ["citrico"],
+    );
+    expect(s.compatibilityScore).toBeCloseTo(0.5 + 0.3 + 0.15, 5);
+  });
+
+  test("rating limitado a 0.15 mesmo com nota máxima", () => {
+    const p = makePerfume({ avaliacao: 5.0 });
+    const s = scoreCandidate(
+      p,
+      { genero: "unissex", familia: "Xyz", ocasiao: "Trabalho", intensidade: "Moderada", nota: "qqq" },
+      ["xyz"],
+    );
+    expect(s.compatibilityScore).toBeCloseTo(0.15, 5);
   });
 
   test("nota curta (<3) não pontua", () => {
@@ -208,5 +233,50 @@ describe("rankRecommendations", () => {
         nota: "rosa",
       }),
     ).toEqual([]);
+  });
+
+  test("expansão: similar do ML entra mesmo com score baixo", () => {
+    const ancora = makePerfume({
+      id: 1,
+      nome: "Ancora",
+      acordes_principais: ["Floral"],
+      avaliacao: 5,
+      top5_similares: ["Alvo"],
+    });
+    const fillers = Array.from({ length: 5 }, (_, i) =>
+      makePerfume({
+        id: 10 + i,
+        nome: `F${i}`,
+        acordes_principais: ["Floral"],
+        avaliacao: 4.9,
+      }),
+    );
+    const alvo = makePerfume({
+      id: 99,
+      nome: "Alvo",
+      acordes_principais: ["Xyz"],
+      avaliacao: 0,
+    });
+    const ranked = rankRecommendations([ancora, ...fillers, alvo], {
+      genero: "unissex",
+      familia: "Floral",
+      ocasiao: "Trabalho",
+      intensidade: "Moderada",
+      nota: "qqq",
+    });
+    expect(ranked.map((p) => p.nome)).toContain("Alvo");
+  });
+
+  test("MMR: diferente com score menor passa clone idêntico", () => {
+    const scored = [1, 2, 3].map((id) => ({
+      ...makePerfume({
+        id,
+        acordes_principais: [id === 3 ? "Amadeirado" : "Floral"],
+      }),
+      compatibilityScore: id === 1 ? 1.0 : id === 2 ? 0.95 : 0.9,
+      recommendationReason: "x",
+    }));
+    const out = mmrSelect(scored, 3);
+    expect(out.map((p) => p.id)).toEqual([1, 3, 2]);
   });
 });
