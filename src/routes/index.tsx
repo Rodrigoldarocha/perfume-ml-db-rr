@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { getPerfumes } from "@/services/perfume.functions";
 import { PerfumeCard } from "@/features/perfumes/components/PerfumeCard";
 import { Layout } from "@/components/Layout";
@@ -49,16 +49,22 @@ const faqs = [
   }
 ];
 
+const PAGE_SIZE = 20;
+
 function Index() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
-  const [visibleCount, setVisibleCount] = useState(20);
 
-  const { data } = useSuspenseQuery({
-    queryKey: ["perfumes", { search: debouncedSearch, visibleCount }],
-    queryFn: () => getPerfumes({ data: { search: debouncedSearch, page: 1, pageSize: visibleCount } }),
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useSuspenseInfiniteQuery({
+    queryKey: ["perfumes", { search: debouncedSearch }],
+    queryFn: ({ pageParam = 1 }) =>
+      getPerfumes({ data: { search: debouncedSearch, page: pageParam as number, pageSize: PAGE_SIZE } }),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.perfumes.length < PAGE_SIZE ? undefined : allPages.length + 1,
+    initialPageParam: 1,
   });
-  const hasMore = data.perfumes.length < data.total;
+  const perfumes = data.pages.flatMap((p) => p.perfumes);
+  const total = data.pages[0]?.total ?? 0;
 
   return (
     <Layout>
@@ -83,7 +89,7 @@ function Index() {
                 maxLength={100}
                 className="pl-12 h-14 bg-white border-none shadow-sm rounded-none text-lg font-light focus-visible:ring-1 focus-visible:ring-primary/20"
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); setVisibleCount(20); }}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <Button asChild className="h-14 px-8 rounded-none uppercase tracking-widest text-xs bg-primary hover:bg-primary/90">
@@ -98,29 +104,30 @@ function Index() {
       <div className="container mx-auto px-4 pb-20">
         <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-4">
           <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium">
-            {data.total} {data.total === 1 ? "Fragrância encontrada" : "Fragrâncias encontradas"}
+            {total} {total === 1 ? "Fragrância encontrada" : "Fragrâncias encontradas"}
           </h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {data.perfumes.map((perfume) => (
+          {perfumes.map((perfume) => (
             <PerfumeCard key={perfume.id} perfume={perfume} />
           ))}
         </div>
 
-        {hasMore && (
+        {hasNextPage && (
           <div className="text-center mt-12">
             <Button
               variant="outline"
-              onClick={() => setVisibleCount((c) => Math.min(c + 20, 100))}
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
               className="rounded-none uppercase tracking-widest text-xs px-8 h-12"
             >
-              Carregar mais ({data.perfumes.length}/{data.total})
+              {isFetchingNextPage ? "Carregando..." : `Carregar mais (${perfumes.length}/${total})`}
             </Button>
           </div>
         )}
 
-        {data.perfumes.length === 0 && (
+        {perfumes.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground font-light text-xl">Nenhum perfume encontrado para sua busca.</p>
             <Button variant="link" onClick={() => setSearch("")} className="mt-4 text-primary uppercase tracking-widest text-xs">

@@ -84,6 +84,20 @@ async function seed() {
 
   console.log(`Processing ${perfumes.length} perfumes...`);
 
+  if (!Array.isArray(perfumes) || perfumes.length === 0) {
+    console.error("Dataset vazio ou inválido. Use scripts/process_dataset.py para gerar o CSV.");
+    process.exit(1);
+  }
+
+  // DEPRECATED para datasets grandes: O(n²) abaixo estoura memória acima de ~2k itens.
+  // Pipeline oficial: scripts/process_dataset.py -> scripts/upload_dataset.py
+  if (perfumes.length > 2000) {
+    console.error(
+      `Dataset com ${perfumes.length} itens: seed.ts O(n²) recusado. Rode process_dataset.py + upload_dataset.py.`
+    );
+    process.exit(1);
+  }
+
   // 2. Vectorization for Clustering and Similarity
   console.log("Vectorizing perfumes...");
   

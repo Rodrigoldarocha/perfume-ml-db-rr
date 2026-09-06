@@ -13,7 +13,7 @@ from collections import Counter
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "/mnt/user-uploads/perfumes_ptbr.json"
 OUT = sys.argv[2] if len(sys.argv) > 2 else "/tmp/perfumes_processed.csv"
-K = 12
+K_FIXED = 12
 SEED = 42
 
 MINOR = {"de", "da", "do", "das", "dos", "e", "of", "the", "la", "le", "du", "des", "von", "van", "y", "el"}
@@ -39,6 +39,9 @@ print("Lendo dataset…")
 data = json.load(open(SRC, encoding="utf-8"))
 n = len(data)
 print(f"{n} perfumes carregados")
+if n == 0:
+    sys.exit("Dataset vazio. Nada a processar.")
+K = min(K_FIXED, n)
 
 # ---------- 1. TF-IDF ----------
 print("Vetorizando (TF-IDF)…")

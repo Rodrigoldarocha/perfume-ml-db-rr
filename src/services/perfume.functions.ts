@@ -92,23 +92,31 @@ export const getDistinctMarcas = createServerFn({ method: "GET" }).handler(
 export const getRecommendations = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z.object({
-      genero: z.string(),
-      familia: z.string(),
-      ocasiao: z.string(),
-      intensidade: z.string(),
-      nota: z.string(),
+      genero: z.string().trim().min(1).max(50),
+      familia: z.string().trim().min(1).max(50),
+      ocasiao: z.string().trim().min(1).max(50),
+      intensidade: z.string().trim().min(1).max(50),
+      nota: z.string().trim().min(1).max(50),
     }).parse(data)
   )
   .handler(async ({ data }) => {
     const normalize = (s: string) =>
       s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    // Allowlist: evita valor inválido chegar ao enum do banco (causa raiz do
+    // "Ocorreu um erro ao carregar as recomendações" com URL manipulada).
+    const GENEROS = ["masculino", "feminino", "unissex"] as const;
+    const rawGenero = normalize(data.genero);
+    const targetGenero: (typeof GENEROS)[number] = (
+      GENEROS as readonly string[]
+    ).includes(rawGenero)
+      ? (rawGenero as (typeof GENEROS)[number])
+      : "unissex";
     // 1. Geração de Candidatos
     // unissex = aberto a tudo, sem filtro gênero. Específico = inclui unissex.
-    const targetGenero = normalize(data.genero);
     let query = supabase.from("perfumes").select("*");
 
     if (targetGenero !== "unissex") {
-      query = query.in("genero", [targetGenero as any, "unissex"]);
+      query = query.in("genero", [targetGenero, "unissex"]);
     }
 
     const { data: candidates, error } = await query

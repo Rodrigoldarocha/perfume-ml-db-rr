@@ -9,10 +9,10 @@ import { z } from "zod";
 
 const searchSchema = z.object({
   genero: z.string().catch("Unissex"),
-  familia: z.string().catch("Cítrico"),
+  familia: z.string().catch("Floral"),
   ocasiao: z.string().catch("Dia a dia"),
   intensidade: z.string().catch("Moderada"),
-  nota: z.string().catch("Lavanda"),
+  nota: z.string().catch("Limão"),
 });
 
 export const Route = createFileRoute("/recomendacoes")({
@@ -30,9 +30,11 @@ export const Route = createFileRoute("/recomendacoes")({
 
 function Recomendacoes() {
   const search = Route.useSearch();
-  const { data: recommendations, isLoading, isError } = useQuery({
+  const { data: recommendations, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["recommendations", search],
     queryFn: () => getRecommendations({ data: search }),
+    retry: 1,
+    staleTime: 60_000,
   });
 
   if (isLoading) {
@@ -90,9 +92,15 @@ function Recomendacoes() {
             <p className="text-muted-foreground font-light text-xl">
               {isError ? "Ocorreu um erro ao carregar as recomendações." : "Não conseguimos encontrar recomendações exatas no momento."}
             </p>
-            <Button asChild className="mt-8 rounded-none uppercase tracking-widest text-xs">
-              <Link to="/quiz">Tentar novamente</Link>
-            </Button>
+            {isError ? (
+              <Button onClick={() => refetch()} disabled={isFetching} className="mt-8 rounded-none uppercase tracking-widest text-xs">
+                {isFetching ? "Tentando novamente..." : "Tentar novamente"}
+              </Button>
+            ) : (
+              <Button asChild className="mt-8 rounded-none uppercase tracking-widest text-xs">
+                <Link to="/quiz">Tentar novamente</Link>
+              </Button>
+            )}
           </div>
         )}
       </div>

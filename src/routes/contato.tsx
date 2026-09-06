@@ -24,8 +24,16 @@ function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
-      toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
-      navigate({ to: "/agradecimento" });
+      try {
+        toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
+        navigate({ to: "/agradecimento" }).catch(() => {
+          setIsSubmitting(false);
+          toast.error("Falha ao redirecionar. Tente novamente.");
+        });
+      } catch {
+        setIsSubmitting(false);
+        toast.error("Falha ao enviar. Tente novamente.");
+      }
     }, 800);
   };
 

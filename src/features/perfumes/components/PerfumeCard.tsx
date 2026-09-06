@@ -41,7 +41,7 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
             <Badge variant="outline" className="text-[10px] uppercase font-light tracking-wider rounded-none px-2 py-0 border-primary/20">
               {perfume.genero}
             </Badge>
-            {perfume.avaliacao && (
+            {perfume.avaliacao != null && (
               <div className="flex items-center gap-1 text-xs">
                 <Star className="w-3 h-3 fill-primary text-primary" />
                 <span>{perfume.avaliacao.toFixed(1)}</span>
@@ -49,8 +49,8 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
             )}
           </div>
           <div className="flex flex-wrap gap-1 mt-2">
-            {perfume.acordes_principais.slice(0, 3).map((acorde) => (
-              <span key={acorde} className="text-[10px] text-muted-foreground bg-muted/30 px-1.5 py-0.5">
+            {(perfume.acordes_principais ?? []).slice(0, 3).map((acorde, i) => (
+              <span key={`${acorde}-${i}`} className="text-[10px] text-muted-foreground bg-muted/30 px-1.5 py-0.5">
                 {acorde}
               </span>
             ))}
