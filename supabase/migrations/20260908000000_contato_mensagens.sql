@@ -1,5 +1,6 @@
 -- Formulário de contato: escrita anônima validada, leitura só service_role.
-create table public.contato_mensagens (
+-- Idempotente: Lovable já aplicou equivalente (20260906034649); este vira no-op.
+create table if not exists public.contato_mensagens (
   id bigint generated always as identity primary key,
   nome text not null check (char_length(nome) between 2 and 100),
   email text not null check (email like '%@%.%'),
@@ -9,6 +10,7 @@ create table public.contato_mensagens (
 
 alter table public.contato_mensagens enable row level security;
 
+drop policy if exists "Anon pode enviar contato" on public.contato_mensagens;
 create policy "Anon pode enviar contato"
   on public.contato_mensagens
   for insert
