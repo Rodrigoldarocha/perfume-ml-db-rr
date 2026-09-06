@@ -13,7 +13,7 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
   const [imgOk, setImgOk] = useState(Boolean(perfume.imagem_url));
 
   return (
-    <Link to="/perfume/$id" params={{ id: perfume.id.toString() }} className="block group">
+    <Link to="/perfume/$id" params={{ id: perfume.id.toString() }} preload="intent" className="block group">
       <Card className="h-full overflow-hidden border-none shadow-sm transition-all hover:shadow-md bg-white">
         <div className="aspect-[3/4] bg-muted flex items-center justify-center relative overflow-hidden">
           {/* Foto real do frasco com lazy loading, ou degradê decorativo como fallback */}

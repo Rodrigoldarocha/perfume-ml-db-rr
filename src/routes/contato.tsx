@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { createContato } from "@/services/contato.functions";
 
 export const Route = createFileRoute("/contato")({
   component: Contact,
@@ -20,21 +21,24 @@ function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      try {
-        toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
-        navigate({ to: "/agradecimento" }).catch(() => {
-          setIsSubmitting(false);
-          toast.error("Falha ao redirecionar. Tente novamente.");
-        });
-      } catch {
-        setIsSubmitting(false);
-        toast.error("Falha ao enviar. Tente novamente.");
-      }
-    }, 800);
+    const form = e.currentTarget;
+    const payload = {
+      nome: new FormData(form).get("nome")?.toString() ?? "",
+      email: new FormData(form).get("email")?.toString() ?? "",
+      mensagem: new FormData(form).get("mensagem")?.toString() ?? "",
+    };
+    try {
+      await createContato({ data: payload });
+      toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
+      await navigate({ to: "/agradecimento" });
+    } catch {
+      setIsSubmitting(false);
+      toast.error("Falha ao enviar. Confira os campos e tente novamente.");
+    }
   };
 
   return (
@@ -48,15 +52,15 @@ function Contact() {
         <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 border border-primary/5 shadow-sm">
           <div className="space-y-2">
             <Label htmlFor="name" className="uppercase text-[10px] tracking-widest font-light">Nome</Label>
-            <Input id="name" required placeholder="Seu nome completo" className="rounded-none border-primary/10" maxLength={100} />
+            <Input id="name" name="nome" required minLength={2} placeholder="Seu nome completo" className="rounded-none border-primary/10" maxLength={100} autoComplete="name" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email" className="uppercase text-[10px] tracking-widest font-light">E-mail</Label>
-            <Input id="email" type="email" required placeholder="seu@email.com" className="rounded-none border-primary/10" maxLength={100} />
+            <Input id="email" name="email" type="email" required placeholder="seu@email.com" className="rounded-none border-primary/10" maxLength={100} autoComplete="email" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="message" className="uppercase text-[10px] tracking-widest font-light">Mensagem</Label>
-            <Textarea id="message" required placeholder="Como podemos ajudar?" className="rounded-none border-primary/10 min-h-[150px]" maxLength={500} />
+            <Textarea id="message" name="mensagem" required minLength={10} placeholder="Como podemos ajudar? (mínimo 10 caracteres)" className="rounded-none border-primary/10 min-h-[150px]" maxLength={2000} />
           </div>
           <Button type="submit" disabled={isSubmitting} className="w-full rounded-none uppercase tracking-widest text-xs h-12">
             {isSubmitting ? "Enviando..." : (

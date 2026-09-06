@@ -215,6 +215,7 @@ function PerfumeDetail() {
                     key={nomeSimilar}
                     to="/perfume/$id"
                     params={{ id: match.id.toString() }}
+                    preload="intent"
                     className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm group hover:shadow-md transition-shadow"
                   >
                     <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">{match.marca}</span>
