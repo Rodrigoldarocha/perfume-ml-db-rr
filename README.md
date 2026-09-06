@@ -35,7 +35,7 @@ ParfumSeg é um catálogo de perfumes em português com:
 - **Explorar** — busca instantânea com debounce, paginação infinita e cards com foto,
   avaliação e acordes principais.
 - **Descobrir (quiz)** — 5 perguntas (gênero, família olfativa, ocasião, intensidade,
-  nota favorita) que geram uma *assinatura olfativa* com até 12 recomendações e motivo.
+  nota favorita) que geram uma *assinatura olfativa* com até 15 recomendações e motivo.
 - **Detalhe** — pirâmide olfativa (saída/coração/fundo), acordes, perfumista,
   perfil de cluster e **fragrâncias similares clicáveis**.
 - **Contato** — formulário com confirmação em página de agradecimento.
@@ -95,8 +95,9 @@ Princípios: handlers finos, regra de negócio em `lib/` pura, fonte única
    quebra o enum do banco). `unissex` = sem filtro; específico = específico + unissex.
    Busca ordenada por avaliação + nº de avaliações, `limit 1000` determinístico.
 2. **Score** — `+0.5` afinidade de família (`FAMILY_MAP` normalizado sem acentos),
-   `+0.3` nota favorita (mínimo 3 letras, match unilateral), `+avaliação/10`.
-3. **Rank** — filtra `score >= 0.3`, ordena desc, top 12. Fallback top 8 se
+   `+0.3` nota favorita (mínimo 3 letras, match unilateral), `+0.15` ocasião
+   (`OCCASION_MAP`), `+0.15` intensidade (`INTENSITY_MAP`), `+avaliação/10`.
+3. **Rank** — filtra `score >= 0.3`, ordena desc, top 15. Fallback top 15 se
    menos de 3 passarem no threshold. Motivo exibido por card.
 
 Pesos e limites vivem em `src/lib/recommendation.ts` — ajuste fino sem tocar em I/O.

@@ -131,8 +131,9 @@ export const getRecommendations = createServerFn({ method: "POST" })
       genero: targetGenero,
       familia: data.familia,
       ocasiao: data.ocasiao,
+      intensidade: data.intensidade,
       nota: data.nota,
-    }).slice(0, 12) as ScoredPerfume[];
+    }).slice(0, 15) as ScoredPerfume[];
   });
 
 export const getPerfumesByNames = createServerFn({ method: "GET" })

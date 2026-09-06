@@ -83,7 +83,7 @@ describe("scoreCandidate", () => {
     });
     const s = scoreCandidate(
       p,
-      { genero: "feminino", familia: "Floral", ocasiao: "Trabalho", nota: "rosa" },
+      { genero: "feminino", familia: "Floral", ocasiao: "Trabalho", intensidade: "Moderada", nota: "rosa" },
       ["floral", "rosa"],
     );
     expect(s.compatibilityScore).toBeCloseTo(0.5 + 0.3 + 0.4, 5);
@@ -94,7 +94,7 @@ describe("scoreCandidate", () => {
     const p = makePerfume({ notas_saida: ["a"], avaliacao: 0 });
     const s = scoreCandidate(
       p,
-      { genero: "unissex", familia: "Xyz", ocasiao: "Trabalho", nota: "a" },
+      { genero: "unissex", familia: "Xyz", ocasiao: "Trabalho", intensidade: "Moderada", nota: "a" },
       ["xyz"],
     );
     expect(s.compatibilityScore).toBe(0);
@@ -110,7 +110,7 @@ describe("scoreCandidate", () => {
     });
     const s = scoreCandidate(
       p,
-      { genero: "unissex", familia: "Floral", ocasiao: "Dia a dia", nota: "rosa" },
+      { genero: "unissex", familia: "Floral", ocasiao: "Dia a dia", intensidade: "Moderada", nota: "rosa" },
       ["floral"],
     );
     expect(s.compatibilityScore).toBe(0);
@@ -132,6 +132,7 @@ describe("rankRecommendations", () => {
       genero: "unissex",
       familia: "Floral",
       ocasiao: "Trabalho",
+      intensidade: "Moderada",
       nota: "rosa",
     });
     expect(ranked.length).toBeLessThanOrEqual(MAX_RESULTS);
@@ -142,7 +143,46 @@ describe("rankRecommendations", () => {
     }
   });
 
-  test("fallback: poucos acima do threshold retorna top8", () => {
+  test("teto: 30 candidatos retornam 15", () => {
+    const list = Array.from({ length: 30 }, (_, i) =>
+      makePerfume({
+        id: i + 1,
+        nome: `Q${i + 1}`,
+        acordes_principais: ["Floral"],
+        avaliacao: 5,
+      }),
+    );
+    const ranked = rankRecommendations(list, {
+      genero: "unissex",
+      familia: "Floral",
+      ocasiao: "Trabalho",
+      intensidade: "Moderada",
+      nota: "rosa",
+    });
+    expect(ranked.length).toBe(15);
+  });
+
+  test("ocasião e intensidade somam no score", () => {
+    const base = {
+      genero: "unissex",
+      familia: "Xyz",
+      nota: "qqq",
+    } as const;
+    const neutro = scoreCandidate(
+      makePerfume({ acordes_principais: ["Oriental"], avaliacao: 0 }),
+      { ...base, ocasiao: "Trabalho", intensidade: "Moderada" },
+      ["xyz"],
+    );
+    const alinhado = scoreCandidate(
+      makePerfume({ acordes_principais: ["Oriental"], avaliacao: 0 }),
+      { ...base, ocasiao: "Noite/Festas", intensidade: "Intensa/Marcante" },
+      ["xyz"],
+    );
+    expect(alinhado.compatibilityScore).toBeGreaterThan(neutro.compatibilityScore);
+    expect(alinhado.recommendationReason).toContain("noite/festas");
+  });
+
+  test("fallback: poucos acima do threshold retorna top15", () => {
     const list = [
       makePerfume({ id: 1, avaliacao: 0 }),
       makePerfume({ id: 2, avaliacao: 0 }),
@@ -151,6 +191,7 @@ describe("rankRecommendations", () => {
       genero: "unissex",
       familia: "Xyz",
       ocasiao: "Trabalho",
+      intensidade: "Moderada",
       nota: "qqq",
     });
     expect(ranked.length).toBeLessThanOrEqual(FALLBACK_COUNT);
@@ -163,6 +204,7 @@ describe("rankRecommendations", () => {
         genero: "unissex",
         familia: "Floral",
         ocasiao: "Trabalho",
+        intensidade: "Moderada",
         nota: "rosa",
       }),
     ).toEqual([]);

@@ -16,14 +16,32 @@ export const FAMILY_MAP: Record<string, string[]> = {
 
 export const FAMILY_SCORE = 0.5;
 export const NOTE_SCORE = 0.3;
+export const OCCASION_SCORE = 0.15;
+export const INTENSITY_SCORE = 0.15;
 export const SCORE_THRESHOLD = 0.3;
-export const MAX_RESULTS = 12;
-export const FALLBACK_COUNT = 8;
+export const MAX_RESULTS = 15;
+export const FALLBACK_COUNT = 15;
+
+/** Termos que traduzem ocasião em perfil olfativo. */
+export const OCCASION_MAP: Record<string, string[]> = {
+  "dia a dia": ["fresco", "citrico", "aquatico", "aromatico", "verde"],
+  trabalho: ["fresco", "aromatico", "verde", "citrico"],
+  "noite/festas": ["oriental", "ambar", "doce", "especiado", "musgo", "patchouli"],
+  encontros: ["floral", "doce", "baunilha", "rosa"],
+};
+
+/** Termos que traduzem intensidade desejada em perfil olfativo. */
+export const INTENSITY_MAP: Record<string, string[]> = {
+  suave: ["fresco", "aquatico", "citrico", "verde", "floral"],
+  moderada: [],
+  "intensa/marcante": ["oriental", "ambar", "doce", "especiado", "musgo", "patchouli", "amadeirado"],
+};
 
 export interface RecommendationInput {
   genero: string;
   familia: string;
   ocasiao: string;
+  intensidade: string;
   nota: string;
 }
 
@@ -63,26 +81,40 @@ function scoreNote(
   return all.some((x) => x.includes(n)) ? NOTE_SCORE : 0;
 }
 
+/** Match de perfil (ocasião/intensidade) contra acordes + notas.
+ *  Unilateral (token contém termo): bilateral superestima em tokens curtos. */
+function scoreProfile(tokens: string[], terms: string[], weight: number): number {
+  if (terms.length === 0) return 0;
+  const norm = tokens.map(normalizePt).filter((t) => t.length >= 3);
+  return norm.some((t) => terms.some((term) => t.includes(term))) ? weight : 0;
+}
+
 export function scoreCandidate(
   perfume: Perfume,
   input: RecommendationInput,
   familyTerms: string[],
 ): ScoredPerfume {
-  const familyPts = scoreFamily(perfume.acordes_principais || [], familyTerms);
-  const notePts = scoreNote(
-    {
-      saida: perfume.notas_saida || [],
-      coracao: perfume.notas_coracao || [],
-      fundo: perfume.notas_fundo || [],
-    },
-    input.nota,
-  );
+  const acordes = perfume.acordes_principais || [];
+  const notas = {
+    saida: perfume.notas_saida || [],
+    coracao: perfume.notas_coracao || [],
+    fundo: perfume.notas_fundo || [],
+  };
+  const familyPts = scoreFamily(acordes, familyTerms);
+  const notePts = scoreNote(notas, input.nota);
+  const occasionTerms = OCCASION_MAP[normalizePt(input.ocasiao)] || [];
+  const intensityTerms = INTENSITY_MAP[normalizePt(input.intensidade)] || [];
+  const allTokens = [...acordes, ...notas.saida, ...notas.coracao, ...notas.fundo];
+  const occasionPts = scoreProfile(allTokens, occasionTerms, OCCASION_SCORE);
+  const intensityPts = scoreProfile(allTokens, intensityTerms, INTENSITY_SCORE);
   const ratingPts = (perfume.avaliacao || 0) / 10;
-  const score = familyPts + notePts + ratingPts;
+  const score = familyPts + notePts + occasionPts + intensityPts + ratingPts;
 
   const motivos: string[] = [];
   if (familyPts > 0) motivos.push(`Alta afinidade com a família olfativa ${input.familia}`);
   if (notePts > 0) motivos.push(`Contém notas de ${input.nota} que você aprecia`);
+  if (occasionPts > 0) motivos.push(`Combina com ${input.ocasiao.toLowerCase()}`);
+  if (intensityPts > 0) motivos.push(`Intensidade ${input.intensidade.toLowerCase()} alinhada ao perfil`);
 
   const fallbackReason = `Ideal para ${input.ocasiao.toLowerCase()}`;
   return {
