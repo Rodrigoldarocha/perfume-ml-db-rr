@@ -24,7 +24,13 @@ export const getPerfumes = createServerFn({ method: "GET" })
       .parse(data)
   )
   .handler(async ({ data }) => {
-    let query = supabase.from("perfumes").select("*", { count: "exact" });
+    // Select enxuto: cards usam só id/nome/marca/genero/avaliacao/acordes/imagem.
+    // Pirâmide completa vem de getPerfumeById / getRecommendations.
+    let query = supabase
+      .from("perfumes")
+      .select("id,nome,marca,genero,avaliacao,acordes_principais,imagem_url", {
+        count: "exact",
+      });
 
     if (data.search) {
       query = query.ilike("nome", `%${escapeLike(data.search)}%`);
@@ -33,7 +39,7 @@ export const getPerfumes = createServerFn({ method: "GET" })
       query = query.eq("marca", data.marca);
     }
     if (data.genero) {
-      query = query.eq("genero", data.genero as any);
+      query = query.eq("genero", data.genero);
     }
     if (data.acordo) {
       query = query.contains("acordes_principais", [data.acordo]);
@@ -46,7 +52,8 @@ export const getPerfumes = createServerFn({ method: "GET" })
     const to = from + data.pageSize - 1;
 
     const { data: perfumes, count, error } = await query
-      .order("avaliacao", { ascending: false })
+      .order("avaliacao", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: true })
       .range(from, to);
 
     if (error) throw new Error(error.message);

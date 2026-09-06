@@ -42,6 +42,8 @@ function Index() {
     getNextPageParam: (lastPage, allPages) =>
       lastPage.perfumes.length < PAGE_SIZE ? undefined : allPages.length + 1,
     initialPageParam: 1,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
   });
   const perfumes = data.pages.flatMap((p) => p.perfumes);
   const total = data.pages[0]?.total ?? 0;
@@ -53,7 +55,7 @@ function Index() {
           <Badge variant="outline" className="mb-6 uppercase tracking-[0.3em] font-light border-primary/20 text-primary">
             Sua Essência, Nossa Ciência
           </Badge>
-          <h1 className="text-4xl md:text-6xl font-serif mb-6 text-primary max-w-4xl mx-auto leading-tight">
+          <h1 className="text-[clamp(2.25rem,5.5vw,3.75rem)] font-serif mb-6 text-primary max-w-4xl mx-auto leading-tight">
             Descubra a fragrância que conta a sua história
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light mb-10 leading-relaxed">
@@ -89,8 +91,14 @@ function Index() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {perfumes.map((perfume) => (
-            <PerfumeCard key={perfume.id} perfume={perfume} />
+          {perfumes.map((perfume, i) => (
+            <div
+              key={perfume.id}
+              className="animate-rise"
+              style={{ animationDelay: `${Math.min(i % PAGE_SIZE, 8) * 45}ms` }}
+            >
+              <PerfumeCard perfume={perfume} />
+            </div>
           ))}
         </div>
 

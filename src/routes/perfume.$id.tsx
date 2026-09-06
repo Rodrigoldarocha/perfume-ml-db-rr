@@ -41,6 +41,8 @@ function PerfumeDetail() {
   const { data: perfume } = useSuspenseQuery({
     queryKey: ["perfume", id],
     queryFn: () => getPerfumeById({ data: id }),
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
   });
   const [imgOk, setImgOk] = useState(Boolean(perfume.imagem_url));
   const similarNames = perfume.top5_similares ?? [];
@@ -48,6 +50,8 @@ function PerfumeDetail() {
     queryKey: ["similares", id, similarNames],
     queryFn: () => getPerfumesByNames({ data: { names: similarNames.slice(0, 10) } }),
     enabled: similarNames.length > 0,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
   });
   const similaresByName = new Map((similares ?? []).map((s) => [s.nome, s]));
 

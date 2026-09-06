@@ -29,6 +29,7 @@ function Recomendacoes() {
     queryFn: () => getRecommendations({ data: search }),
     retry: 1,
     staleTime: 60_000,
+    gcTime: 5 * 60_000,
   });
 
   if (isLoading) {
@@ -58,7 +59,7 @@ function Recomendacoes() {
 
       <div className="container mx-auto px-4 pb-32">
         <div className="flex items-center justify-between mb-12 border-b border-primary/10 pb-4">
-          <Link to="/quiz" className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/quiz" className="flex items-center gap-2 min-h-[44px] text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors">
             <ArrowLeft className="w-3 h-3" /> Refazer Quiz
           </Link>
           <h3 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-medium">
@@ -68,12 +69,16 @@ function Recomendacoes() {
 
         {recommendations && recommendations.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {recommendations.map((perfume) => (
-              <div key={perfume.id} className="relative group">
+            {recommendations.map((perfume, i) => (
+              <div
+                key={perfume.id}
+                className="relative group animate-rise"
+                style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+              >
                 <PerfumeCard perfume={perfume} />
                 {perfume.recommendationReason && (
                   <div className="absolute top-2 right-2 z-10">
-                    <div className="bg-primary text-primary-foreground text-[8px] uppercase tracking-tighter px-2 py-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <div className="bg-primary text-primary-foreground text-[8px] uppercase tracking-tighter px-2 py-1 shadow-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity pointer-events-none">
                       {perfume.recommendationReason}
                     </div>
                   </div>

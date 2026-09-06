@@ -114,7 +114,7 @@ function Quiz() {
           {currentStep > 0 && (
             <button 
               onClick={() => setCurrentStep(currentStep - 1)}
-              className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors"
+              className="flex items-center gap-2 min-h-[44px] text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors"
             >
               <ArrowLeft className="w-3 h-3" /> Voltar
             </button>
