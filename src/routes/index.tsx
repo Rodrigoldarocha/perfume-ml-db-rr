@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { getPerfumes } from "@/services/perfume.functions";
+import { useSuspenseInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { getDistinctMarcas, getPerfumes } from "@/services/perfume.functions";
 import { PerfumeCard } from "@/features/perfumes/components/PerfumeCard";
 import { Layout } from "@/components/Layout";
 import { Input } from "@/components/ui/input";
@@ -34,11 +34,30 @@ const PAGE_SIZE = 20;
 function Index() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const [marca, setMarca] = useState("");
+  const [genero, setGenero] = useState("");
+  const [acordo, setAcordo] = useState("");
+  const debouncedAcordo = useDebounce(acordo, 500);
+
+  const filters = {
+    search: debouncedSearch || undefined,
+    marca: marca || undefined,
+    genero: (genero || undefined) as "masculino" | "feminino" | "unissex" | undefined,
+    acordo: debouncedAcordo.trim() || undefined,
+  };
+  const hasActiveFilters = Boolean(marca || genero || debouncedAcordo.trim());
+
+  const { data: marcas } = useSuspenseQuery({
+    queryKey: ["marcas"],
+    queryFn: () => getDistinctMarcas(),
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
+  });
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useSuspenseInfiniteQuery({
-    queryKey: ["perfumes", { search: debouncedSearch }],
+    queryKey: ["perfumes", filters],
     queryFn: ({ pageParam = 1 }) =>
-      getPerfumes({ data: { search: debouncedSearch, page: pageParam as number, pageSize: PAGE_SIZE } }),
+      getPerfumes({ data: { ...filters, page: pageParam as number, pageSize: PAGE_SIZE } }),
     getNextPageParam: (lastPage, allPages) =>
       lastPage.perfumes.length < PAGE_SIZE ? undefined : allPages.length + 1,
     initialPageParam: 1,
@@ -47,6 +66,13 @@ function Index() {
   });
   const perfumes = data.pages.flatMap((p) => p.perfumes);
   const total = data.pages[0]?.total ?? 0;
+
+  const clearFilters = () => {
+    setSearch("");
+    setMarca("");
+    setGenero("");
+    setAcordo("");
+  };
 
   return (
     <Layout>
@@ -84,10 +110,58 @@ function Index() {
       </section>
 
       <div className="container mx-auto px-4 pb-20">
-        <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-4">
-          <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium">
+        <div className="flex flex-wrap items-end gap-4 mb-8 border-b border-primary/10 pb-6">
+          <h3 className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-medium mr-auto min-h-[44px] inline-flex items-center">
             {total} {total === 1 ? "Fragrância encontrada" : "Fragrâncias encontradas"}
           </h3>
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Marca
+              <select
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                className="min-h-[44px] bg-white border border-primary/10 rounded-none px-3 text-xs normal-case tracking-normal text-foreground"
+              >
+                <option value="">Todas</option>
+                {marcas.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Gênero
+              <select
+                value={genero}
+                onChange={(e) => setGenero(e.target.value)}
+                className="min-h-[44px] bg-white border border-primary/10 rounded-none px-3 text-xs normal-case tracking-normal text-foreground"
+              >
+                <option value="">Todos</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="unissex">Unissex</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+              Acorde
+              <Input
+                type="text"
+                value={acordo}
+                onChange={(e) => setAcordo(e.target.value)}
+                placeholder="Ex.: baunilha"
+                maxLength={100}
+                className="min-h-[44px] w-40 bg-white border border-primary/10 rounded-none text-xs"
+              />
+            </label>
+            {hasActiveFilters && (
+              <Button
+                variant="link"
+                onClick={clearFilters}
+                className="min-h-[44px] text-primary uppercase tracking-widest text-xs"
+              >
+                Limpar filtros
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -118,7 +192,7 @@ function Index() {
         {perfumes.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground font-light text-xl">Nenhum perfume encontrado para sua busca.</p>
-            <Button variant="link" onClick={() => setSearch("")} className="mt-4 text-primary uppercase tracking-widest text-xs">
+            <Button variant="link" onClick={clearFilters} className="mt-4 min-h-[44px] text-primary uppercase tracking-widest text-xs">
               Limpar busca
             </Button>
           </div>

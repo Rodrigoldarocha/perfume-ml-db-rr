@@ -83,31 +83,42 @@ function Quiz() {
         <div className="mb-12">
           <div className="flex justify-between items-center mb-4">
              <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Passo {currentStep + 1} de {steps.length}</span>
-             <div className="w-48 h-px bg-primary/10 relative">
+             <div
+               className="w-48 h-px bg-primary/10 relative"
+               role="progressbar"
+               aria-valuenow={currentStep + 1}
+               aria-valuemin={1}
+               aria-valuemax={steps.length}
+               aria-label="Progresso do quiz"
+             >
                <div 
                  className="absolute left-0 top-0 h-full bg-primary transition-all duration-500" 
                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
                />
              </div>
           </div>
-          <h2 className="text-3xl font-serif text-primary tracking-wide">
+          <h2 id="quiz-step-title" aria-live="polite" className="text-3xl font-serif text-primary tracking-wide">
             {steps[currentStep]?.title}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {steps[currentStep]?.options.map((option) => (
-            <button
-              key={option}
-              onClick={() => handleSelect(option)}
-              className="group p-6 text-left border border-primary/10 hover:border-primary transition-all bg-white hover:bg-primary hover:text-primary-foreground"
-            >
-              <div className="flex items-center justify-between">
-                <span className="uppercase tracking-widest text-sm font-light">{option}</span>
-                <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 gap-4" role="group" aria-labelledby="quiz-step-title">
+          {steps[currentStep]?.options.map((option) => {
+            const selected = answers[currentStep] === option;
+            return (
+              <button
+                key={option}
+                onClick={() => handleSelect(option)}
+                aria-current={selected || undefined}
+                className={`group p-6 text-left border transition-all bg-white hover:bg-primary hover:text-primary-foreground ${selected ? "border-primary" : "border-primary/10"}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="uppercase tracking-widest text-sm font-light">{option}</span>
+                  <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         <div className="mt-12 flex justify-start">

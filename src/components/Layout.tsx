@@ -33,20 +33,20 @@ export function Layout({ children }: { children?: React.ReactNode }) {
       <footer className="bg-primary text-primary-foreground py-12 mt-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-xl font-serif tracking-widest uppercase mb-4">ParfumSeg</h2>
-          <p className="text-sm text-primary-foreground/60 max-w-md mx-auto mb-8 font-light">
+          <p className="text-sm text-primary-foreground/80 max-w-md mx-auto mb-8 font-light">
             Sua jornada olfativa começa aqui. Encontre a fragrância que define sua essência.
           </p>
           <div className="flex flex-col items-center gap-4 mb-8">
-            <div className="flex justify-center gap-6 text-[10px] uppercase tracking-widest font-light text-primary-foreground/60">
-              <Link to="/privacidade" className="hover:text-primary-foreground transition-colors">Privacidade</Link>
-              <Link to="/contato" className="hover:text-primary-foreground transition-colors">Contato</Link>
+            <div className="flex justify-center gap-6 text-[10px] uppercase tracking-widest font-light text-primary-foreground/80">
+              <Link to="/privacidade" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Privacidade</Link>
+              <Link to="/contato" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Contato</Link>
             </div>
-            <div className="flex justify-center gap-4 text-[10px] tracking-widest font-light text-primary-foreground/60">
-              <a href="https://www.linkedin.com/in/rodrigo-rocha-19249170/" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors uppercase">LinkedIn</a>
-              <a href="https://github.com/Rodrigoldarocha" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors uppercase">GitHub</a>
+            <div className="flex justify-center gap-4 text-[10px] tracking-widest font-light text-primary-foreground/80">
+              <a href="https://www.linkedin.com/in/rodrigo-rocha-19249170/" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors uppercase">LinkedIn</a>
+              <a href="https://github.com/Rodrigoldarocha" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors uppercase">GitHub</a>
             </div>
           </div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/40 border-t border-primary-foreground/10 pt-8">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/70 border-t border-primary-foreground/10 pt-8">
             Dados originais: Fragrantica.com, via Kaggle (olgagmiufana1), traduzidos para PT-BR.
           </div>
         </div>
