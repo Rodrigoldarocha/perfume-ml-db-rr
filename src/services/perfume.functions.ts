@@ -3,17 +3,21 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Perfume } from "@/types/perfume";
 
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (m) => `\\${m}`);
+}
+
 export const getPerfumes = createServerFn({ method: "GET" })
   .inputValidator((data) =>
     z
       .object({
-        search: z.string().optional(),
-        marca: z.string().optional(),
-        genero: z.string().optional(),
-        acordo: z.string().optional(),
-        minAvaliacao: z.number().optional(),
-        page: z.number().default(1),
-        pageSize: z.number().default(20),
+        search: z.string().trim().max(100).optional(),
+        marca: z.string().trim().max(100).optional(),
+        genero: z.enum(["masculino", "feminino", "unissex"]).optional(),
+        acordo: z.string().trim().max(100).optional(),
+        minAvaliacao: z.number().min(0).max(5).optional(),
+        page: z.number().int().min(1).max(1000).default(1),
+        pageSize: z.number().int().min(1).max(100).default(20),
       })
       .parse(data)
   )
@@ -21,7 +25,7 @@ export const getPerfumes = createServerFn({ method: "GET" })
     let query = supabase.from("perfumes").select("*", { count: "exact" });
 
     if (data.search) {
-      query = query.ilike("nome", `%${data.search}%`);
+      query = query.ilike("nome", `%${escapeLike(data.search)}%`);
     }
     if (data.marca) {
       query = query.eq("marca", data.marca);
@@ -54,12 +58,16 @@ export const getPerfumes = createServerFn({ method: "GET" })
   });
 
 export const getPerfumeById = createServerFn({ method: "GET" })
-  .inputValidator((id) => z.string().parse(id))
+  .inputValidator((id) => z.string().regex(/^\d+$/).parse(id))
   .handler(async ({ data: id }) => {
+    const numericId = Number.parseInt(id, 10);
+    if (!Number.isSafeInteger(numericId) || numericId < 1) {
+      throw new Error("Perfume não encontrado");
+    }
     const { data, error } = await supabase
       .from("perfumes")
       .select("*")
-      .eq("id", parseInt(id))
+      .eq("id", numericId)
       .single();
 
     if (error) throw new Error(error.message);
@@ -71,7 +79,8 @@ export const getDistinctMarcas = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("perfumes")
       .select("marca")
-      .order("marca");
+      .order("marca")
+      .limit(5000);
 
     if (error) throw new Error(error.message);
     
@@ -91,17 +100,21 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }).parse(data)
   )
   .handler(async ({ data }) => {
+    const normalize = (s: string) =>
+      s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
     // 1. Geração de Candidatos
-    const targetGenero = data.genero.toLowerCase();
+    // unissex = aberto a tudo, sem filtro gênero. Específico = inclui unissex.
+    const targetGenero = normalize(data.genero);
     let query = supabase.from("perfumes").select("*");
-    
-    if (targetGenero !== 'unissex') {
-      query = query.in("genero", [targetGenero as any, 'unissex']);
-    } else {
-      query = query.eq("genero", 'unissex');
+
+    if (targetGenero !== "unissex") {
+      query = query.in("genero", [targetGenero as any, "unissex"]);
     }
 
-    const { data: candidates, error } = await query.limit(1000);
+    const { data: candidates, error } = await query
+      .order("avaliacao", { ascending: false, nullsFirst: false })
+      .order("numero_avaliacoes", { ascending: false, nullsFirst: false })
+      .limit(1000);
     if (error) throw new Error(error.message);
     
     if (!candidates || candidates.length === 0) {
@@ -109,24 +122,24 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }
 
     // 2. Filtros e Scores
-    const targetFamilia = data.familia.toLowerCase();
-    const targetNota = data.nota.toLowerCase();
-    
+    const targetFamilia = normalize(data.familia);
+    const targetNota = normalize(data.nota);
+
     const mapping: Record<string, string[]> = {
-      'cítrico': ['cítrico', 'aromático', 'aquático', 'fresco'],
-      'floral': ['floral', 'rosa', 'flores brancas', 'íris', 'violeta'],
-      'amadeirado': ['amadeirado', 'terroso', 'musgo', 'patchouli'],
-      'oriental': ['oriental', 'baunilha', 'doce', 'especiado', 'âmbar'],
-      'fougere': ['lavanda', 'aromático', 'verde', 'musgo']
+      citrico: ["citrico", "aromatico", "aquatico", "fresco"],
+      floral: ["floral", "rosa", "flores brancas", "iris", "violeta"],
+      amadeirado: ["amadeirado", "terroso", "musgo", "patchouli"],
+      oriental: ["oriental", "baunilha", "doce", "especiado", "ambar"],
+      fougere: ["lavanda", "aromatico", "verde", "musgo"],
     };
     const familyTerms = mapping[targetFamilia] || [targetFamilia];
 
-    const scoredPerfumes = candidates.map(perfume => {
+    const scoredPerfumes = candidates.map((perfume) => {
       let score = 0;
       const motivos: string[] = [];
 
-      const acordes = (perfume.acordes_principais || []).map(a => a.toLowerCase());
-      if (acordes.some(a => familyTerms.includes(a))) {
+      const acordes = (perfume.acordes_principais || []).map((a) => normalize(a));
+      if (acordes.some((a) => familyTerms.includes(a))) {
         score += 0.5;
         motivos.push(`Alta afinidade com a família olfativa ${data.familia}`);
       }
@@ -134,10 +147,10 @@ export const getRecommendations = createServerFn({ method: "POST" })
       const todasNotas = [
         ...(perfume.notas_saida || []),
         ...(perfume.notas_coracao || []),
-        ...(perfume.notas_fundo || [])
-      ].map(n => n.toLowerCase());
+        ...(perfume.notas_fundo || []),
+      ].map((n) => normalize(n));
 
-      if (todasNotas.some(n => n.includes(targetNota) || targetNota.includes(n))) {
+      if (targetNota.length >= 3 && todasNotas.some((n) => n.includes(targetNota))) {
         score += 0.3;
         motivos.push(`Contém notas de ${data.nota} que você aprecia`);
       }
@@ -165,4 +178,19 @@ export const getRecommendations = createServerFn({ method: "POST" })
     }
 
     return finalResults.slice(0, 12) as (Perfume & { compatibilityScore: number; recommendationReason: string })[];
+  });
+
+export const getPerfumesByNames = createServerFn({ method: "GET" })
+  .inputValidator((data) =>
+    z.object({ names: z.array(z.string().trim().min(1).max(200)).min(1).max(20) }).parse(data)
+  )
+  .handler(async ({ data }) => {
+    const { data: perfumes, error } = await supabase
+      .from("perfumes")
+      .select("id,nome,marca,imagem_url,genero,avaliacao")
+      .in("nome", data.names)
+      .limit(20);
+
+    if (error) throw new Error(error.message);
+    return (perfumes ?? []) as Pick<Perfume, "id" | "nome" | "marca" | "imagem_url" | "genero" | "avaliacao">[];
   });

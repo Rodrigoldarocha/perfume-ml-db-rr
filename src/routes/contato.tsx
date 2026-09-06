@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,15 +18,15 @@ export const Route = createFileRoute("/contato")({
 
 function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
       toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
-      setIsSubmitting(false);
-      (e.target as HTMLFormElement).reset();
-    }, 1000);
+      navigate({ to: "/agradecimento" });
+    }, 800);
   };
 
   return (

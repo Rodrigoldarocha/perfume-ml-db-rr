@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { getPerfumeById } from "@/services/perfume.functions";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { getPerfumeById, getPerfumesByNames } from "@/services/perfume.functions";
 import { Layout } from "@/components/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Star, ExternalLink, ChevronRight, Home } from "lucide-react";
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/perfume/$id")({
     return {
       title: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "Detalhes do Perfume | ParfumSeg",
       meta: [
-        { name: "description", content: data ? `Descubra as notas de ${data.nome} da ${data.marca}. Acordes: ${data.acordes_principais.join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
+        { name: "description", content: data ? `Descubra as notas de ${data.nome} da ${data.marca}. Acordes: ${(data.acordes_principais ?? []).join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
         { property: "og:title", content: data ? `${data.nome} - ${data.marca} | Pirâmide Olfativa` : "ParfumSeg | Catálogo de Perfumes" },
         { property: "og:description", content: data ? `Explore a composição detalhada e encontre fragrâncias parecidas com ${data.nome}.` : "Explore 24.000+ fragrâncias traduzidas." },
         { property: "og:type", content: "website" },
@@ -43,6 +43,13 @@ function PerfumeDetail() {
     queryFn: () => getPerfumeById({ data: id }),
   });
   const [imgOk, setImgOk] = useState(Boolean(perfume.imagem_url));
+  const similarNames = perfume.top5_similares ?? [];
+  const { data: similares } = useQuery({
+    queryKey: ["similares", id, similarNames],
+    queryFn: () => getPerfumesByNames({ data: { names: similarNames.slice(0, 10) } }),
+    enabled: similarNames.length > 0,
+  });
+  const similaresByName = new Map((similares ?? []).map((s) => [s.nome, s]));
 
 
   return (
@@ -189,12 +196,28 @@ function PerfumeDetail() {
               Fragrâncias Similares
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {perfume.top5_similares.map((nomeSimilar) => (
-                <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm group hover:shadow-md transition-shadow">
-                  <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Similar</span>
-                  <h4 className="font-serif text-sm uppercase tracking-wider group-hover:text-primary transition-colors">{nomeSimilar}</h4>
-                </div>
-              ))}
+              {perfume.top5_similares.map((nomeSimilar) => {
+                const match = similaresByName.get(nomeSimilar);
+                if (!match) {
+                  return (
+                    <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm">
+                      <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Similar</span>
+                      <h4 className="font-serif text-sm uppercase tracking-wider">{nomeSimilar}</h4>
+                    </div>
+                  );
+                }
+                return (
+                  <Link
+                    key={nomeSimilar}
+                    to="/perfume/$id"
+                    params={{ id: match.id.toString() }}
+                    className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm group hover:shadow-md transition-shadow"
+                  >
+                    <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">{match.marca}</span>
+                    <h4 className="font-serif text-sm uppercase tracking-wider group-hover:text-primary transition-colors">{match.nome}</h4>
+                  </Link>
+                );
+              })}
             </div>
             <p className="text-[10px] text-center text-muted-foreground mt-8 uppercase tracking-widest font-light italic">
               *Similaridades inferidas pelo nosso sistema baseado em acordes e notas.

@@ -4,8 +4,12 @@ import csv, json, os, re, sys, time
 import requests
 
 CSV_PATH = sys.argv[1] if len(sys.argv) > 1 else "/tmp/perfumes_processed.csv"
-URL = os.environ["SUPABASE_URL"].rstrip("/") + "/rest/v1/perfumes"
-KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+DRY_RUN = "--dry-run" in sys.argv
+try:
+    URL = os.environ["SUPABASE_URL"].rstrip("/") + "/rest/v1/perfumes?on_conflict=nome,marca"
+    KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+except KeyError as e:
+    sys.exit(f"Missing env {e}. Exporte SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.")
 H = {"apikey": KEY, "Authorization": f"Bearer {KEY}", "Content-Type": "application/json"}
 
 ARR = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -42,10 +46,12 @@ with open(CSV_PATH, encoding="utf-8") as f:
             "top5_similares": parse_arr(r["top5_similares"]),
         })
 print(f"{len(rows)} linhas prontas")
+if DRY_RUN:
+    print("dry-run: nada enviado. Remova --dry-run para aplicar upsert.")
+    sys.exit(0)
 
-print("Limpando catálogo antigo…")
-d = requests.delete(URL + "?id=gt.0", headers=H, timeout=180)
-print("delete:", d.status_code, d.text[:200])
+# Sem DELETE full-table: upsert idempotente via on_conflict=nome,marca.
+# Para troca atômica, cargar em tabela staging e depois rename — fora desse script simples.
 
 CH = 500
 for i in range(0, len(rows), CH):

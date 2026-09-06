@@ -52,11 +52,13 @@ const faqs = [
 function Index() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   const { data } = useSuspenseQuery({
-    queryKey: ["perfumes", { search: debouncedSearch }],
-    queryFn: () => getPerfumes({ data: { search: debouncedSearch, page: 1, pageSize: 20 } }),
+    queryKey: ["perfumes", { search: debouncedSearch, visibleCount }],
+    queryFn: () => getPerfumes({ data: { search: debouncedSearch, page: 1, pageSize: visibleCount } }),
   });
+  const hasMore = data.perfumes.length < data.total;
 
   return (
     <Layout>
@@ -81,7 +83,7 @@ function Index() {
                 maxLength={100}
                 className="pl-12 h-14 bg-white border-none shadow-sm rounded-none text-lg font-light focus-visible:ring-1 focus-visible:ring-primary/20"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setVisibleCount(20); }}
               />
             </div>
             <Button asChild className="h-14 px-8 rounded-none uppercase tracking-widest text-xs bg-primary hover:bg-primary/90">
@@ -105,6 +107,18 @@ function Index() {
             <PerfumeCard key={perfume.id} perfume={perfume} />
           ))}
         </div>
+
+        {hasMore && (
+          <div className="text-center mt-12">
+            <Button
+              variant="outline"
+              onClick={() => setVisibleCount((c) => Math.min(c + 20, 100))}
+              className="rounded-none uppercase tracking-widest text-xs px-8 h-12"
+            >
+              Carregar mais ({data.perfumes.length}/{data.total})
+            </Button>
+          </div>
+        )}
 
         {data.perfumes.length === 0 && (
           <div className="text-center py-20">
