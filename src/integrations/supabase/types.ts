@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      contato_mensagens: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          mensagem: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: never
+          mensagem: string
+          nome: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: never
+          mensagem?: string
+          nome?: string
+        }
+        Relationships: []
+      }
       perfumes: {
         Row: {
           acordes_principais: string[]
@@ -80,30 +104,6 @@ export type Database = {
           perfumista_2?: string | null
           top5_similares?: string[]
           url_fonte?: string
-        }
-        Relationships: []
-      }
-      contato_mensagens: {
-        Row: {
-          id: number
-          nome: string
-          email: string
-          mensagem: string
-          created_at: string
-        }
-        Insert: {
-          id?: number
-          nome: string
-          email: string
-          mensagem: string
-          created_at?: string
-        }
-        Update: {
-          id?: number
-          nome?: string
-          email?: string
-          mensagem?: string
-          created_at?: string
         }
         Relationships: []
       }
