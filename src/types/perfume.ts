@@ -19,5 +19,6 @@ export interface Perfume {
   cluster: number | null;
   cluster_perfil: string | null;
   top5_similares: string[];
+  imagem_url: string | null;
   created_at?: string;
 }
