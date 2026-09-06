@@ -92,6 +92,10 @@ function PerfumeDetail() {
 
           {/* Info Area */}
           <div className="flex flex-col">
+            <div className="mb-8">
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
+              <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
+            </div>
             <div className="mb-8 border-b border-primary/10 pb-6">
               <div className="flex items-center justify-between mb-4">
                 <Badge variant="outline" className="rounded-none uppercase tracking-widest font-light border-primary/20">
