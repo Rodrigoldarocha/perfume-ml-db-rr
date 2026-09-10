@@ -281,20 +281,48 @@ export function rankRecommendations(
 
   const anchors = base.slice(0, ANCHOR_COUNT);
   const anchorIds = new Set(anchors.map((a) => a.id));
+
+  // Cluster dominante das âncoras (K-Means offline): candidatos do mesmo
+  // cluster recebem bônus — afinidade real calculada pelo modelo.
+  const clusterCounts = new Map<number, number>();
+  for (const a of anchors) {
+    if (a.cluster != null)
+      clusterCounts.set(a.cluster, (clusterCounts.get(a.cluster) ?? 0) + 1);
+  }
+  let dominantCluster: number | null = null;
+  let dominantCount = 0;
+  for (const [c, n] of clusterCounts) {
+    if (n > dominantCount) {
+      dominantCount = n;
+      dominantCluster = c;
+    }
+  }
+  const withClusterBonus = scored.map((p) =>
+    dominantCluster != null && p.cluster === dominantCluster
+      ? { ...p, compatibilityScore: p.compatibilityScore + CLUSTER_BONUS }
+      : p,
+  );
+  const byScoreWithCluster = [...withClusterBonus].sort(
+    (a, b) => b.compatibilityScore - a.compatibilityScore,
+  );
+
   // Similares resolvem na lista completa: vizinho do ML entra mesmo abaixo
-  // do threshold (sinal de similaridade, não de score).
-  const byName = new Map(byScore.map((p) => [p.nome, p]));
+  // do threshold e ganha bônus (sinal de similaridade, não de score).
+  const byName = new Map(byScoreWithCluster.map((p) => [p.nome, p]));
   const expanded: ScoredPerfume[] = [...anchors];
   for (const anchor of anchors) {
     for (const name of anchor.top5_similares || []) {
       const match = byName.get(name);
       if (match && !anchorIds.has(match.id) && !expanded.includes(match)) {
         anchorIds.add(match.id);
-        expanded.push(match);
+        expanded.push({
+          ...match,
+          compatibilityScore: match.compatibilityScore + ML_NEIGHBOR_BONUS,
+        });
       }
     }
   }
-  for (const p of base) {
+  for (const p of byScoreWithCluster) {
     if (!anchorIds.has(p.id)) {
       anchorIds.add(p.id);
       expanded.push(p);
