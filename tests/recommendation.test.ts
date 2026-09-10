@@ -20,7 +20,7 @@ function makePerfume(overrides: Partial<Perfume> = {}): Perfume {
     genero: "masculino",
     avaliacao: 4.0,
     numero_avaliacoes: 100,
-    ano_lancamento: 2020,
+    ano_lancamento: null,
     notas_saida: [],
     notas_coracao: [],
     notas_fundo: [],
@@ -185,6 +185,67 @@ describe("rankRecommendations", () => {
       nota: "rosa",
     });
     expect(ranked.length).toBe(15);
+  });
+
+  test("recência: lançamento novo pontua mais que antigo, sem dominar gosto", () => {
+    const base = {
+      genero: "unissex",
+      familia: "Xyz",
+      ocasiao: "Trabalho",
+      intensidade: "Moderada",
+      nota: "qqq",
+    } as const;
+    const atual = scoreCandidate(
+      makePerfume({ ano_lancamento: new Date().getFullYear(), avaliacao: 0 }),
+      base,
+      ["xyz"],
+    );
+    const antigo = scoreCandidate(
+      makePerfume({ ano_lancamento: 2000, avaliacao: 0 }),
+      base,
+      ["xyz"],
+    );
+    expect(atual.compatibilityScore).toBeGreaterThan(antigo.compatibilityScore);
+    expect(antigo.compatibilityScore).toBe(0);
+    // Teto: nunca passa de RECENCY_MAX (0.1) — gosto manda, recência desempata.
+    expect(atual.compatibilityScore).toBeLessThanOrEqual(0.1);
+    expect(atual.recommendationReason).toContain("Lançamento recente");
+  });
+
+  test("cluster dominante das âncoras dá bônus aos candidatos do mesmo cluster", () => {
+    const anchors = [1, 2, 3].map((id) =>
+      makePerfume({
+        id,
+        nome: `A${id}`,
+        acordes_principais: ["Floral"],
+        avaliacao: 5,
+        cluster: 7,
+      }),
+    );
+    const mesmoCluster = makePerfume({
+      id: 9,
+      nome: "Mesmo",
+      acordes_principais: ["Floral"],
+      avaliacao: 4.0,
+      cluster: 7,
+    });
+    const outroCluster = makePerfume({
+      id: 10,
+      nome: "Outro",
+      acordes_principais: ["Floral"],
+      avaliacao: 4.0,
+      cluster: 3,
+    });
+    const ranked = rankRecommendations([...anchors, outroCluster, mesmoCluster], {
+      genero: "unissex",
+      familia: "Floral",
+      ocasiao: "Trabalho",
+      intensidade: "Moderada",
+      nota: "qqq",
+    });
+    const m = ranked.find((p) => p.nome === "Mesmo")!;
+    const o = ranked.find((p) => p.nome === "Outro")!;
+    expect(m.compatibilityScore).toBeCloseTo(o.compatibilityScore + 0.06, 5);
   });
 
   test("ocasião e intensidade somam no score", () => {
