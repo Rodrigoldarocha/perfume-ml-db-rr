@@ -20,6 +20,14 @@ export const OCCASION_SCORE = 0.15;
 export const INTENSITY_SCORE = 0.15;
 /** Teto do prior de popularidade: rating soma no máximo 0.15 (não domina gosto). */
 export const RATING_SCALE = 0.3;
+/** Bônus de recência: lançamentos novos somam no máximo este valor.
+ *  Linear entre RECENCY_FLOOR_YEAR e o ano atual. */
+export const RECENCY_MAX = 0.1;
+export const RECENCY_FLOOR_YEAR = 2015;
+/** Bônus por coerência de cluster: candidato no mesmo cluster (K-Means) das âncoras. */
+export const CLUSTER_BONUS = 0.06;
+/** Bônus para vizinhos do ML (top5_similares) trazidos pela expansão de âncoras. */
+export const ML_NEIGHBOR_BONUS = 0.08;
 export const SCORE_THRESHOLD = 0.3;
 export const MAX_RESULTS = 15;
 export const FALLBACK_COUNT = 15;
@@ -169,13 +177,25 @@ export function scoreCandidate(
   // Prior de popularidade pequeno e limitado: não domina o gosto.
   const rating = Math.max(0, Math.min(5, perfume.avaliacao || 0));
   const ratingPts = (rating / 10) * RATING_SCALE;
-  const score = familyPts + notePts + occasionPts + intensityPts + ratingPts;
+  // Recência: linear de RECENCY_FLOOR_YEAR até o ano atual; desconhecido = 0.
+  const ano = perfume.ano_lancamento || 0;
+  const anoAtual = new Date().getFullYear();
+  const recencyPts =
+    ano >= RECENCY_FLOOR_YEAR
+      ? ((Math.min(ano, anoAtual) - RECENCY_FLOOR_YEAR) /
+          Math.max(1, anoAtual - RECENCY_FLOOR_YEAR)) *
+        RECENCY_MAX
+      : 0;
+  const score =
+    familyPts + notePts + occasionPts + intensityPts + ratingPts + recencyPts;
 
   const motivos: string[] = [];
   if (familyPts > 0) motivos.push(`Alta afinidade com a família olfativa ${input.familia}`);
   if (notePts > 0) motivos.push(`Contém notas de ${input.nota} que você aprecia`);
   if (occasionPts > 0) motivos.push(`Combina com ${input.ocasiao.toLowerCase()}`);
   if (intensityPts > 0) motivos.push(`Intensidade ${input.intensidade.toLowerCase()} alinhada ao perfil`);
+  if (recencyPts >= RECENCY_MAX * 0.7 && ano > 0)
+    motivos.push(`Lançamento recente (${ano})`);
 
   const fallbackReason = `Ideal para ${input.ocasiao.toLowerCase()}`;
   return {
@@ -261,20 +281,48 @@ export function rankRecommendations(
 
   const anchors = base.slice(0, ANCHOR_COUNT);
   const anchorIds = new Set(anchors.map((a) => a.id));
+
+  // Cluster dominante das âncoras (K-Means offline): candidatos do mesmo
+  // cluster recebem bônus — afinidade real calculada pelo modelo.
+  const clusterCounts = new Map<number, number>();
+  for (const a of anchors) {
+    if (a.cluster != null)
+      clusterCounts.set(a.cluster, (clusterCounts.get(a.cluster) ?? 0) + 1);
+  }
+  let dominantCluster: number | null = null;
+  let dominantCount = 0;
+  for (const [c, n] of clusterCounts) {
+    if (n > dominantCount) {
+      dominantCount = n;
+      dominantCluster = c;
+    }
+  }
+  const withClusterBonus = scored.map((p) =>
+    dominantCluster != null && p.cluster === dominantCluster
+      ? { ...p, compatibilityScore: p.compatibilityScore + CLUSTER_BONUS }
+      : p,
+  );
+  const byScoreWithCluster = [...withClusterBonus].sort(
+    (a, b) => b.compatibilityScore - a.compatibilityScore,
+  );
+
   // Similares resolvem na lista completa: vizinho do ML entra mesmo abaixo
-  // do threshold (sinal de similaridade, não de score).
-  const byName = new Map(byScore.map((p) => [p.nome, p]));
+  // do threshold e ganha bônus (sinal de similaridade, não de score).
+  const byName = new Map(byScoreWithCluster.map((p) => [p.nome, p]));
   const expanded: ScoredPerfume[] = [...anchors];
   for (const anchor of anchors) {
     for (const name of anchor.top5_similares || []) {
       const match = byName.get(name);
       if (match && !anchorIds.has(match.id) && !expanded.includes(match)) {
         anchorIds.add(match.id);
-        expanded.push(match);
+        expanded.push({
+          ...match,
+          compatibilityScore: match.compatibilityScore + ML_NEIGHBOR_BONUS,
+        });
       }
     }
   }
-  for (const p of base) {
+  for (const p of byScoreWithCluster) {
     if (!anchorIds.has(p.id)) {
       anchorIds.add(p.id);
       expanded.push(p);
