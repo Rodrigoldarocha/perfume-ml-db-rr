@@ -11,9 +11,21 @@ export function Layout({ children }: { children?: React.ReactNode }) {
       </a>
       <header className="border-b border-primary/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 min-h-20 py-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          <Link to="/" className="flex flex-col items-center min-h-[44px] justify-center">
-            <h1 className="text-2xl font-serif tracking-[0.1em] text-primary uppercase leading-none">ParfumSeg</h1>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">Catálogo & Recomendador</span>
+          <Link to="/" aria-label="ParfumSeg — início" className="flex items-center gap-3 min-h-[44px] justify-center">
+            <img
+              src="/icons/icon-192.png"
+              alt="Logotipo ParfumSeg — frasco de perfume"
+              width={32}
+              height={32}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="h-8 w-8 md:h-9 md:w-9 shrink-0 object-contain"
+            />
+            <div className="flex flex-col items-start">
+              <h1 className="text-2xl font-serif tracking-[0.1em] text-primary uppercase leading-none">ParfumSeg</h1>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">Catálogo & Recomendador</span>
+            </div>
           </Link>
 
           <nav aria-label="Navegação principal" className="flex items-center gap-5 md:gap-8 uppercase text-xs tracking-widest font-light">
@@ -32,7 +44,19 @@ export function Layout({ children }: { children?: React.ReactNode }) {
 
       <footer className="bg-primary text-primary-foreground py-12 mt-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-xl font-serif tracking-widest uppercase mb-4">ParfumSeg</h2>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img
+              src="/icons/icon-192.png"
+              alt=""
+              aria-hidden="true"
+              width={28}
+              height={28}
+              loading="lazy"
+              decoding="async"
+              className="h-7 w-7 shrink-0 object-contain opacity-90"
+            />
+            <h2 className="text-xl font-serif tracking-widest uppercase">ParfumSeg</h2>
+          </div>
           <p className="text-sm text-primary-foreground/80 max-w-md mx-auto mb-8 font-light">
             Sua jornada olfativa começa aqui. Encontre a fragrância que define sua essência.
           </p>
