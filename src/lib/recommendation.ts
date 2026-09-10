@@ -20,6 +20,14 @@ export const OCCASION_SCORE = 0.15;
 export const INTENSITY_SCORE = 0.15;
 /** Teto do prior de popularidade: rating soma no máximo 0.15 (não domina gosto). */
 export const RATING_SCALE = 0.3;
+/** Bônus de recência: lançamentos novos somam no máximo este valor.
+ *  Linear entre RECENCY_FLOOR_YEAR e o ano atual. */
+export const RECENCY_MAX = 0.1;
+export const RECENCY_FLOOR_YEAR = 2015;
+/** Bônus por coerência de cluster: candidato no mesmo cluster (K-Means) das âncoras. */
+export const CLUSTER_BONUS = 0.06;
+/** Bônus para vizinhos do ML (top5_similares) trazidos pela expansão de âncoras. */
+export const ML_NEIGHBOR_BONUS = 0.08;
 export const SCORE_THRESHOLD = 0.3;
 export const MAX_RESULTS = 15;
 export const FALLBACK_COUNT = 15;
@@ -169,13 +177,25 @@ export function scoreCandidate(
   // Prior de popularidade pequeno e limitado: não domina o gosto.
   const rating = Math.max(0, Math.min(5, perfume.avaliacao || 0));
   const ratingPts = (rating / 10) * RATING_SCALE;
-  const score = familyPts + notePts + occasionPts + intensityPts + ratingPts;
+  // Recência: linear de RECENCY_FLOOR_YEAR até o ano atual; desconhecido = 0.
+  const ano = perfume.ano_lancamento || 0;
+  const anoAtual = new Date().getFullYear();
+  const recencyPts =
+    ano >= RECENCY_FLOOR_YEAR
+      ? ((Math.min(ano, anoAtual) - RECENCY_FLOOR_YEAR) /
+          Math.max(1, anoAtual - RECENCY_FLOOR_YEAR)) *
+        RECENCY_MAX
+      : 0;
+  const score =
+    familyPts + notePts + occasionPts + intensityPts + ratingPts + recencyPts;
 
   const motivos: string[] = [];
   if (familyPts > 0) motivos.push(`Alta afinidade com a família olfativa ${input.familia}`);
   if (notePts > 0) motivos.push(`Contém notas de ${input.nota} que você aprecia`);
   if (occasionPts > 0) motivos.push(`Combina com ${input.ocasiao.toLowerCase()}`);
   if (intensityPts > 0) motivos.push(`Intensidade ${input.intensidade.toLowerCase()} alinhada ao perfil`);
+  if (recencyPts >= RECENCY_MAX * 0.7 && ano > 0)
+    motivos.push(`Lançamento recente (${ano})`);
 
   const fallbackReason = `Ideal para ${input.ocasiao.toLowerCase()}`;
   return {
