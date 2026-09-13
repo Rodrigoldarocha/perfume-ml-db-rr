@@ -34,14 +34,10 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
               </div>
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 left-0 right-0 p-4">
-            <div className="flex items-end justify-between">
-              <span className="txt-body text-[10px] uppercase tracking-[0.15em] text-primary/60 block mb-1">{perfume.marca}</span>
-              <h3 className="txt-display font-serif text-lg leading-tight">{perfume.nome}</h3>
-            </div>
-          </div>
         </div>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-4">
+          <span className="txt-body text-[10px] uppercase tracking-[0.15em] text-primary/60 block mb-1">{perfume.marca}</span>
+          <h3 className="txt-display font-serif text-lg leading-tight mb-3">{perfume.nome}</h3>
           <div className="flex items-center justify-between mb-3">
             {perfume.avaliacao != null && (
               <div className="flex items-center gap-1">
