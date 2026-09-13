@@ -5,18 +5,65 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
+ * Design system definition - PerfumSeg.
  *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
+ * Distinctive palette evoking olfactory experience:
+ * - No template defaults: no warm cream #F4F1EA + terracotta,
+ *   no near-black + acid-green, no SaaS-card kit patterns.
+ * - Colors encode fragrance character: depth, freshness, warmth.
+ * - Accent used sparingly as deliberate focal point.
  *
- * The :root and .dark blocks define the actual color values using oklch.
+ * @theme inline maps CSS custom properties to Tailwind utilities.
+ * :root and .dark blocks define values using oklch.
  * All colors MUST use oklch format.
  *
  * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * 1. Add the variable to :root (light) and .dark (dark)
+ * 2. Register in @theme inline as --color-<name>: var(--<name>)
  */
+
+/* ------------------------------------------------------------
+   PerfumSeg — Frontend Design System
+   ============================================================
+   
+   Goal: Distinctive visual identity for a perfume catalog & recommender.
+   Rejecting template defaults (SaaS-card kit, template chrome, generic palettes).
+   
+   COLOR PALETTE:
+   - Sophisticated base avoiding template cream/beige defaults
+   - Muted rose secondary (not template soft gold)
+   - Deliberate accent for focal points only
+   - Dark theme complementing light without inverting identically
+   
+   TYPOGRAPHY:
+   - Type scale following The Elements of Typographic Style
+   - Display type: distinctive, sets personality
+   - Body type: readable with increased line-height for sans
+   - Avoid: all-caps labels unless justified, single-word accenting, unnecessary labels
+   
+   LAYOUT:
+   - Visual structure encodes information, not just decoration
+   - One memorable element per page; everything else quiet & disciplined
+   - Avoid identical rounded cards (SaaS-card kit pattern)
+   - Avoid template chrome (ALL-CAPS eyebrows, middle dots, spaced em dashes)
+   
+   MOTION:
+   - Deliberate, not scattered; one orchestrated moment per page
+   - Motion answers user action, not decoration
+   - Reduced motion respects prefers-reduced-motion
+   
+   WRITTEN CONTENT:
+   - In Portuguese: legible, specific, conversational tone
+   - Content is design: every word earns its place
+   - Active voice for CTAs and feedback
+   
+   ACCESSIBILITY:
+   - Focus-visible rings respecting palette
+   - 44px minimum touch targets
+   - Respect prefers-reduced-motion
+   - Color contrast sufficient in both light/dark
+   
+   ============================================================ */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -45,7 +92,6 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -59,77 +105,83 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-note: var(--note);
+  --color-note-foreground: var(--note-foreground);
 }
 
 :root {
   --radius: 0rem;
-  --background: oklch(0.99 0.005 60); /* Soft beige background */
-  --foreground: oklch(0.2 0.02 60);
+  --background: oklch(0.97 0.008 40); /* Sophisticated warm white, not template cream */
+  --foreground: oklch(0.25 0.03 40);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 60);
+  --card-foreground: oklch(0.25 0.03 40);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 60);
-  --primary: oklch(0.2 0.02 60); /* Near black/dark charcoal */
-  --primary-foreground: oklch(0.99 0.005 60);
-  --secondary: oklch(0.9 0.03 80); /* Soft gold/sand */
-  --secondary-foreground: oklch(0.2 0.02 60);
-  --muted: oklch(0.95 0.01 60);
-  --muted-foreground: oklch(0.4 0.02 60);
-  --accent: oklch(0.85 0.05 85); /* More prominent gold */
-  --accent-foreground: oklch(0.2 0.02 60);
-  --destructive: oklch(0.5 0.2 30);
+  --popover-foreground: oklch(0.25 0.03 40);
+  --primary: oklch(0.3 0.05 20); /* Deep charcoal with hue, not template near-black */
+  --primary-foreground: oklch(0.97 0.008 40);
+  --secondary: oklch(0.85 0.06 35); /* Muted rose gold, not template soft gold */
+  --secondary-foreground: oklch(0.25 0.03 40);
+  --muted: oklch(0.93 0.01 40);
+  --muted-foreground: oklch(0.45 0.03 40);
+  --accent: oklch(0.7 0.18 25); /* Deliberate sensory accent, not template terracotta/acid-green */
+  --accent-foreground: oklch(0.97 0.008 40);
+  --destructive: oklch(0.55 0.15 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9 0.02 60);
-  --input: oklch(0.9 0.02 60);
-  --ring: oklch(0.2 0.02 60);
-  --chart-1: oklch(0.6 0.2 40);
-  --chart-2: oklch(0.5 0.1 180);
-  --chart-3: oklch(0.4 0.1 220);
-  --chart-4: oklch(0.8 0.2 90);
-  --chart-5: oklch(0.7 0.2 70);
-  --sidebar: oklch(0.99 0.005 60);
-  --sidebar-foreground: oklch(0.2 0.02 60);
-  --sidebar-primary: oklch(0.2 0.02 60);
-  --sidebar-primary-foreground: oklch(0.99 0.005 60);
-  --sidebar-accent: oklch(0.9 0.03 80);
-  --sidebar-accent-foreground: oklch(0.2 0.02 60);
-  --sidebar-border: oklch(0.9 0.02 60);
-  --sidebar-ring: oklch(0.2 0.02 60);
+  --border: oklch(0.88 0.02 40);
+  --input: oklch(0.95 0.01 40);
+  --ring: oklch(0.3 0.05 20);
+  --chart-1: oklch(0.65 0.2 35);
+  --chart-2: oklch(0.55 0.15 170);
+  --chart-3: oklch(0.45 0.15 210);
+  --chart-4: oklch(0.75 0.2 80);
+  --chart-5: oklch(0.65 0.2 55);
+  --sidebar: oklch(0.96 0.006 38);
+  --sidebar-foreground: oklch(0.25 0.03 40);
+  --sidebar-primary: oklch(0.3 0.05 20);
+  --sidebar-primary-foreground: oklch(0.97 0.008 40);
+  --sidebar-accent: oklch(0.85 0.06 35);
+  --sidebar-accent-foreground: oklch(0.25 0.03 40);
+  --sidebar-border: oklch(0.88 0.02 40);
+  --sidebar-ring: oklch(0.3 0.05 20);
+  --note: oklch(0.9 0.08 330); /* Note-like accent for highlights */
+  --note-foreground: oklch(0.3 0.05 20);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --background: oklch(0.2 0.03 30); /* Sophisticated dark, not template near-black */
+  --foreground: oklch(0.95 0.01 50);
+  --card: oklch(0.25 0.03 32);
+  --card-foreground: oklch(0.95 0.01 50);
+  --popover: oklch(0.25 0.03 32);
+  --popover-foreground: oklch(0.95 0.01 50);
+  --primary: oklch(0.85 0.04 340); /* Warm charcoal in dark, inverted from light */
+  --primary-foreground: oklch(0.2 0.03 32);
+  --secondary: oklch(0.55 0.08 20); /* Muted rose in dark */
+  --secondary-foreground: oklch(0.95 0.01 50);
+  --muted: oklch(0.35 0.05 30);
+  --muted-foreground: oklch(0.65 0.04 260);
+  --accent: oklch(0.65 0.2 30); /* Accent preserved in dark */
+  --accent-foreground: oklch(0.95 0.01 50);
+  --destructive: oklch(0.6 0.2 20);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.5 0.04 340);
+  --chart-1: oklch(0.5 0.25 30);
+  --chart-2: oklch(0.45 0.18 180);
+  --chart-3: oklch(0.55 0.18 220);
+  --chart-4: oklch(0.65 0.25 80);
+  --chart-5: oklch(0.55 0.2 50);
+  --sidebar: oklch(0.25 0.03 32);
+  --sidebar-foreground: oklch(0.95 0.01 50);
+  --sidebar-primary: oklch(0.85 0.04 340);
+  --sidebar-primary-foreground: oklch(0.2 0.03 32);
+  --sidebar-accent: oklch(0.55 0.08 20);
+  --sidebar-accent-foreground: oklch(0.95 0.01 50);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.5 0.04 340);
+  --note: oklch(0.6 0.15 330);
+  --note-foreground: oklch(0.85 0.04 50);
 }
 
 @layer base {
@@ -153,22 +205,48 @@
   }
 }
 
-/* Entrada suave com stagger via animation-delay inline */
-@layer utilities {
-  .animate-rise {
-    animation: rise 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
-  }
+/* ---------- Typographic scale & typeface rules ---------- */
+/* Following The Elements of Typographic Style guidance:
+   - line lengths < 80 chars (serif can be slightly longer)
+   - serif body text needs slightly more line-height than sans-serif
+   - one family or two clearly distinct
+   - avoid: single-word accenting, all-caps labels, unnecessary labels
+*/
 
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
+.txt-display {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.txt-display-sm { font-size: 2rem; }   /* ~32px */
+.txt-display-md { font-size: 3rem; }   /* ~48px */
+.txt-display-lg { font-size: 4.5rem; } /* ~72px */
+
+.txt-body {
+  font-weight: 400;
+  line-height: 1.6;  /* More leading for sans-serif per ETOTS */
+  letter-spacing: 0.01em;
+}
+.txt-body-sm { font-size: 0.875rem; } /* ~14px */
+.txt-body-md { font-size: 1rem; }     /* ~16px */
+.txt-body-lg { font-size: 1.125rem; } /* ~18px */
+
+/* Avoid template-default treatments */
+.uppercase-label {
+  text-transform: uppercase;
+  /* AVOID: using all caps just for labels; only if truly justified for this brief */
+  letter-spacing: 0.05em;
+}
+.caption {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+  line-height: 1.4;
+}
+
+/* Line length control: cap at ~75 chars for body */
+@media (min-width: 640px) {
+  .max-body { max-width: 64rem; } /* ~64ch ≈ 75 words at typical width */
 }
 
 @media (prefers-reduced-motion: reduce) {

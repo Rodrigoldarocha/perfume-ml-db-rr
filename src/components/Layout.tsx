@@ -2,10 +2,10 @@ import { Link, Outlet } from "@tanstack/react-router";
 
 export function Layout({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col font-sans selection:bg-accent selection:text-accent-foreground">
+    <div className="min-h-screen flex flex-col txt-body selection:bg-accent selection:text-accent-foreground">
       <a
         href="#conteudo"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:text-xs focus:uppercase focus:tracking-widest"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:text-xs uppercase tracking-widest"
       >
         Pular para o conteúdo
       </a>
@@ -23,8 +23,8 @@ export function Layout({ children }: { children?: React.ReactNode }) {
               className="h-8 w-8 md:h-9 md:w-9 shrink-0 object-contain"
             />
             <div className="flex flex-col items-start">
-              <h1 className="text-2xl font-serif tracking-[0.1em] text-primary uppercase leading-none">ParfumSeg</h1>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">Catálogo & Recomendador</span>
+              <h1 className="txt-display text-2xl font-serif tracking-[0.1em] text-primary uppercase leading-none">ParfumSeg</h1>
+              <span className="txt-body text-[10px] uppercase tracking-[0.3em] text-muted-foreground mt-1">Catálogo & Recomendador</span>
             </div>
           </Link>
 
@@ -42,7 +42,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
         {children || <Outlet />}
       </main>
 
-      <footer className="bg-primary text-primary-foreground py-12 mt-20">
+<footer className="bg-primary text-primary-foreground py-12 mt-20">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img
@@ -55,22 +55,22 @@ export function Layout({ children }: { children?: React.ReactNode }) {
               decoding="async"
               className="h-7 w-7 shrink-0 object-contain opacity-90"
             />
-            <h2 className="text-xl font-serif tracking-widest uppercase">ParfumSeg</h2>
+            <h2 className="txt-display text-xl font-serif tracking-widest uppercase">ParfumSeg</h2>
           </div>
-          <p className="text-sm text-primary-foreground/80 max-w-md mx-auto mb-8 font-light">
+          <p className="txt-body text-sm text-primary-foreground/80 max-w-md mx-auto mb-8 font-light">
             Sua jornada olfativa começa aqui. Encontre a fragrância que define sua essência.
           </p>
           <div className="flex flex-col items-center gap-4 mb-8">
-            <div className="flex justify-center gap-6 text-[10px] uppercase tracking-widest font-light text-primary-foreground/80">
+            <div className="flex justify-center gap-6 txt-caption text-[10px] uppercase tracking-widest font-light text-primary-foreground/80">
               <Link to="/privacidade" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Privacidade</Link>
-              <Link to="/contato" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Contato</Link>
+              <Link to="/contato" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Contato</div>
             </div>
-            <div className="flex justify-center gap-4 text-[10px] tracking-widest font-light text-primary-foreground/80">
-              <a href="https://www.linkedin.com/in/rodrigo-rocha-19249170/" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors uppercase">LinkedIn</a>
-              <a href="https://github.com/Rodrigoldarocha" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors uppercase">GitHub</a>
+            <div className="flex justify-center gap-4 txt-caption text-[10px] tracking-widest font-light text-primary-foreground/80">
+              <a href="https://www.linkedin.com/in/rodrigo-rocha-19249170/" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">LinkedIn</a>
+              <a href="https://github.com/Rodrigoldarocha" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">GitHub</a>
             </div>
           </div>
-          <div className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/70 border-t border-primary-foreground/10 pt-8">
+          <div className="txt-caption text-[10px] uppercase tracking-[0.2em] text-primary-foreground/70 border-t border-primary-foreground/10 pt-8">
             Dados originais: Fragrantica.com, via Kaggle (olgagmiufana1), traduzidos para PT-BR.
           </div>
         </div>
