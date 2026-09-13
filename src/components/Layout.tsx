@@ -63,7 +63,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           <div className="flex flex-col items-center gap-4 mb-8">
             <div className="flex justify-center gap-6 txt-caption text-[10px] uppercase tracking-widest font-light text-primary-foreground/80">
               <Link to="/privacidade" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Privacidade</Link>
-              <Link to="/contato" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Contato</div>
+              <Link to="/contato" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">Contato</Link>
             </div>
             <div className="flex justify-center gap-4 txt-caption text-[10px] tracking-widest font-light text-primary-foreground/80">
               <a href="https://www.linkedin.com/in/rodrigo-rocha-19249170/" target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center hover:text-primary-foreground transition-colors">LinkedIn</a>

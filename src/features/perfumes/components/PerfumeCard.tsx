@@ -50,7 +50,7 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
               </div>
             )}
             <div className="flex items-center gap-2">
-              {(perfume.acorde_destaque ?? []).map((acorde, i) => (
+              {(perfume.acordes_principais ?? []).slice(0, 2).map((acorde: string, i: number) => (
                 <Badge
                   key={i}
                   variant="outline"
