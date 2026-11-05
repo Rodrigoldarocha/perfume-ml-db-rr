@@ -27,6 +27,20 @@ function Quiz() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  const [multiSel, setMultiSel] = useState<string[]>([]);
+  const step = steps[currentStep];
+  const maxMulti = step?.multi ?? 1;
+
+  const toggleMulti = (option: string) => {
+    setMultiSel((cur) =>
+      cur.includes(option)
+        ? cur.filter((o) => o !== option)
+        : cur.length < maxMulti
+          ? [...cur, option]
+          : cur,
+    );
+  };
+
   const handleSelect = (option: string) => {
     const newAnswers = [...answers];
     newAnswers[currentStep] = option;
@@ -102,15 +116,16 @@ function Quiz() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-4" role="group" aria-labelledby="quiz-step-title">
+        <div className={`grid gap-4 ${maxMulti > 1 || (step?.options.length ?? 0) > 6 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-1"}`} role="group" aria-labelledby="quiz-step-title">
           {steps[currentStep]?.options.map((option) => {
-            const selected = answers[currentStep] === option;
+            const selected = maxMulti > 1 ? multiSel.includes(option) : answers[currentStep] === option;
             return (
               <button
                 key={option}
-                onClick={() => handleSelect(option)}
+                onClick={() => (maxMulti > 1 ? toggleMulti(option) : handleSelect(option))}
+                aria-pressed={maxMulti > 1 ? selected : undefined}
                 aria-current={selected || undefined}
-                className={`group p-6 text-left border transition-all bg-white hover:bg-primary hover:text-primary-foreground ${selected ? "border-primary" : "border-primary/10"}`}
+                className={`group ${maxMulti > 1 ? "p-4" : "p-6"} text-left border transition-all hover:bg-primary hover:text-primary-foreground ${selected ? (maxMulti > 1 ? "border-primary bg-primary text-primary-foreground" : "border-primary bg-background") : "border-primary/10 bg-background"}`}
               >
                 <div className="flex items-center justify-between">
                   <span className="uppercase tracking-widest text-sm font-light">{option}</span>
@@ -120,6 +135,18 @@ function Quiz() {
             );
           })}
         </div>
+
+        {maxMulti > 1 && (
+          <div className="mt-8 flex justify-end">
+            <Button
+              disabled={multiSel.length === 0}
+              onClick={() => handleSelect(multiSel.join(", "))}
+              className="rounded-none uppercase tracking-widest px-8"
+            >
+              Continuar ({multiSel.length}/{maxMulti})
+            </Button>
+          </div>
+        )}
 
         <div className="mt-12 flex justify-start">
           {currentStep > 0 && (

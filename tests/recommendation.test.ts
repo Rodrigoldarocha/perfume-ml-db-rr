@@ -57,8 +57,21 @@ describe("resolveFamilyTerms", () => {
   });
 
   test("borda: desconhecida retorna termo normalizado", () => {
-    expect(resolveFamilyTerms("Gourmand")).toEqual(["gourmand"]);
+    expect(resolveFamilyTerms("Xyz")).toEqual(["xyz"]);
   });
+});
+
+test("várias notas: pontua proporcionalmente às encontradas", () => {
+  const p = makePerfume({ notas_coracao: ["Rosa"], notas_fundo: ["Baunilha"], avaliacao: 0 });
+  const base = { genero: "unissex", familia: "Xyz", ocasiao: "Trabalho", intensidade: "Moderada" };
+  const duas = scoreCandidate(p, { ...base, nota: "Rosa, Baunilha" }, ["xyz"]).compatibilityScore;
+  const metade = scoreCandidate(p, { ...base, nota: "Rosa, Lavanda" }, ["xyz"]).compatibilityScore;
+  expect(duas).toBeCloseTo(0.3);
+  expect(metade).toBeCloseTo(0.15);
+});
+
+test("família Gourmand mapeada para acordes doces", () => {
+  expect(resolveFamilyTerms("Gourmand")).toContain("baunilha");
 });
 
 describe("matchGenero", () => {
@@ -168,8 +181,8 @@ describe("rankRecommendations", () => {
     }
   });
 
-  test("teto: 30 candidatos retornam 15", () => {
-    const list = Array.from({ length: 30 }, (_, i) =>
+  test("teto: 50 candidatos retornam 36", () => {
+    const list = Array.from({ length: 50 }, (_, i) =>
       makePerfume({
         id: i + 1,
         nome: `Q${i + 1}`,
@@ -184,7 +197,7 @@ describe("rankRecommendations", () => {
       intensidade: "Moderada",
       nota: "rosa",
     });
-    expect(ranked.length).toBe(15);
+    expect(ranked.length).toBe(36);
   });
 
   test("recência: lançamento novo pontua mais que antigo, sem dominar gosto", () => {

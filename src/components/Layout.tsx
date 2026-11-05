@@ -31,6 +31,7 @@ export function Layout({ children }: { children?: React.ReactNode }) {
           <nav aria-label="Navegação principal" className="flex items-center gap-5 md:gap-8 uppercase text-xs tracking-widest font-light">
             <Link to="/" className="min-h-[44px] inline-flex items-center hover:text-primary transition-colors [&.active]:text-primary [&.active]:font-medium">Explorar</Link>
             <Link to="/quiz" className="min-h-[44px] inline-flex items-center hover:text-primary transition-colors [&.active]:text-primary [&.active]:font-medium">Descobrir</Link>
+            <Link to="/similares" className="min-h-[44px] inline-flex items-center hover:text-primary transition-colors [&.active]:text-primary [&.active]:font-medium">Parecidos</Link>
             <Link to="/contato" className="min-h-[44px] inline-flex items-center hover:text-primary transition-colors [&.active]:text-primary [&.active]:font-medium">Contato</Link>
           </nav>
 
