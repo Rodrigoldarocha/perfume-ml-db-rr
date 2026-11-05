@@ -12,6 +12,12 @@ export const FAMILY_MAP: Record<string, string[]> = {
   amadeirado: ["amadeirado", "terroso", "musgo", "patchouli"],
   oriental: ["oriental", "baunilha", "doce", "especiado", "ambar"],
   fougere: ["lavanda", "aromatico", "verde", "musgo"],
+  gourmand: ["doce", "baunilha", "caramelo", "chocolate", "cafe", "mel"],
+  frutado: ["frutado", "frutas", "tropical", "pessego", "maca"],
+  aquatico: ["aquatico", "marinho", "ozonico", "salgado", "fresco"],
+  couro: ["couro", "defumado", "animalico", "tabaco"],
+  chipre: ["chipre", "musgo", "patchouli", "terroso"],
+  especiado: ["especiado", "quente", "canela", "pimenta"],
 };
 
 export const FAMILY_SCORE = 0.5;
@@ -29,8 +35,8 @@ export const CLUSTER_BONUS = 0.06;
 /** Bônus para vizinhos do ML (top5_similares) trazidos pela expansão de âncoras. */
 export const ML_NEIGHBOR_BONUS = 0.08;
 export const SCORE_THRESHOLD = 0.3;
-export const MAX_RESULTS = 15;
-export const FALLBACK_COUNT = 15;
+export const MAX_RESULTS = 36;
+export const FALLBACK_COUNT = 36;
 /** MMR: 0.7 relevância, 0.3 diversidade. */
 export const MMR_LAMBDA = 0.7;
 export const ANCHOR_COUNT = 3;
@@ -141,10 +147,16 @@ function scoreNote(
   notas: { saida: string[]; coracao: string[]; fundo: string[] },
   targetNota: string,
 ): number {
-  const n = canonTerm(targetNota);
-  if (n.length < 3) return 0;
+  const targets = splitNotes(targetNota).map(canonTerm).filter((n) => n.length >= 3);
+  if (targets.length === 0) return 0;
   const all = [...notas.saida, ...notas.coracao, ...notas.fundo].map(canonTerm);
-  return all.some((x) => x.includes(n)) ? NOTE_SCORE : 0;
+  const hits = targets.filter((n) => all.some((x) => x.includes(n))).length;
+  return (hits / targets.length) * NOTE_SCORE;
+}
+
+/** Quiz permite várias notas separadas por vírgula. */
+export function splitNotes(raw: string): string[] {
+  return raw.split(",").map((t) => t.trim()).filter(Boolean);
 }
 
 /** Match de perfil (ocasião/intensidade) contra acordes + notas.
@@ -191,7 +203,7 @@ export function scoreCandidate(
 
   const motivos: string[] = [];
   if (familyPts > 0) motivos.push(`Alta afinidade com a família olfativa ${input.familia}`);
-  if (notePts > 0) motivos.push(`Contém notas de ${input.nota} que você aprecia`);
+  if (notePts > 0) motivos.push(`Contém notas de ${splitNotes(input.nota).join(", ")} que você aprecia`);
   if (occasionPts > 0) motivos.push(`Combina com ${input.ocasiao.toLowerCase()}`);
   if (intensityPts > 0) motivos.push(`Intensidade ${input.intensidade.toLowerCase()} alinhada ao perfil`);
   if (recencyPts >= RECENCY_MAX * 0.7 && ano > 0)
@@ -329,4 +341,22 @@ export function rankRecommendations(
     }
   }
   return mmrSelect(expanded, Math.min(MAX_RESULTS, FALLBACK_COUNT));
+}
+
+/** Similares a um perfume de referência: vizinhos do ML (top5) primeiro,
+ *  depois candidatos ranqueados por Jaccard de acordes/notas + bônus de cluster. */
+export function rankSimilar(ref: Perfume, candidates: Perfume[], count = 24): Perfume[] {
+  const refSet = tokenSet(ref);
+  const top5 = new Set(ref.top5_similares || []);
+  const scored = candidates
+    .filter((p) => p.id !== ref.id && p.nome !== ref.nome)
+    .map((p) => ({
+      p,
+      s:
+        jaccard(refSet, tokenSet(p)) +
+        (ref.cluster != null && p.cluster === ref.cluster ? CLUSTER_BONUS : 0) +
+        (top5.has(p.nome) ? 1 : 0),
+    }))
+    .sort((a, b) => b.s - a.s);
+  return scored.slice(0, count).map((x) => x.p);
 }

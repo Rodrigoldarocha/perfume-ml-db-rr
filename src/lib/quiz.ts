@@ -4,6 +4,8 @@ import { z } from "zod";
 
 export interface QuizStep {
   title: string;
+  /** Máximo de opções selecionáveis (padrão 1). */
+  multi?: number;
   options: string[];
 }
 
@@ -14,7 +16,7 @@ export const QUIZ_STEPS: QuizStep[] = [
   },
   {
     title: "Qual família olfativa você mais gosta?",
-    options: ["Cítrico", "Floral", "Amadeirado", "Oriental", "Fougere"],
+    options: ["Cítrico", "Floral", "Amadeirado", "Oriental", "Fougere", "Gourmand", "Frutado", "Aquático", "Couro", "Chipre", "Especiado"],
   },
   {
     title: "Para qual ocasião você procura o perfume?",
@@ -25,8 +27,9 @@ export const QUIZ_STEPS: QuizStep[] = [
     options: ["Suave", "Moderada", "Intensa/Marcante"],
   },
   {
-    title: "Quais notas você prefere?",
-    options: ["Baunilha", "Lavanda", "Sândalo", "Rosa", "Limão"],
+    title: "Quais notas você prefere? (até 3)",
+    multi: 3,
+    options: ["Baunilha", "Lavanda", "Sândalo", "Rosa", "Limão", "Bergamota", "Jasmim", "Âmbar", "Almíscar", "Patchouli", "Vetiver", "Cedro", "Couro", "Tabaco", "Café", "Canela", "Pimenta", "Íris", "Oud", "Coco"],
   },
 ];
 

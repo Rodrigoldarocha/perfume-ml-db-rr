@@ -5,6 +5,7 @@ import { Perfume } from "@/types/perfume";
 import { escapeLike } from "@/lib/text";
 import {
   rankRecommendations,
+  rankSimilar,
   resolveGenero,
   type ScoredPerfume,
 } from "@/lib/recommendation";
@@ -98,6 +99,33 @@ export const getDistinctMarcas = createServerFn({ method: "GET" }).handler(
   }
 );
 
+const CANDIDATE_COLS =
+  "id,nome,marca,genero,avaliacao,numero_avaliacoes,ano_lancamento,notas_saida,notas_coracao,notas_fundo,acordes_principais,cluster,cluster_perfil,top5_similares,imagem_url,url_fonte,pais_origem,perfumista_1,perfumista_2";
+
+/** Perfumes parecidos com um de referência (item-to-item). */
+export const getSimilarPerfumes = createServerFn({ method: "GET" })
+  .inputValidator((id) => z.number().int().positive().parse(id))
+  .handler(async ({ data: id }) => {
+    const { data: ref, error } = await supabase
+      .from("perfumes").select(CANDIDATE_COLS).eq("id", id).single();
+    if (error || !ref) throw new Error("Perfume não encontrado");
+    const r = ref as unknown as Perfume;
+    const queries = [
+      r.top5_similares?.length
+        ? supabase.from("perfumes").select(CANDIDATE_COLS).in("nome", r.top5_similares).limit(20)
+        : null,
+      r.cluster != null
+        ? supabase.from("perfumes").select(CANDIDATE_COLS).eq("cluster", r.cluster)
+            .order("numero_avaliacoes", { ascending: false, nullsFirst: false }).limit(1000)
+        : supabase.from("perfumes").select(CANDIDATE_COLS)
+            .order("numero_avaliacoes", { ascending: false, nullsFirst: false }).limit(1000),
+    ];
+    const res = await Promise.all(queries.map((q) => q ?? Promise.resolve({ data: [], error: null })));
+    const pool = new Map<number, Perfume>();
+    for (const x of res) for (const p of (x.data ?? []) as unknown as Perfume[]) pool.set(p.id, p);
+    return { referencia: r, similares: rankSimilar(r, [...pool.values()], 24) };
+  });
+
 export const getRecommendations = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     z.object({
@@ -105,23 +133,25 @@ export const getRecommendations = createServerFn({ method: "POST" })
       familia: z.string().trim().min(1).max(50),
       ocasiao: z.string().trim().min(1).max(50),
       intensidade: z.string().trim().min(1).max(50),
-      nota: z.string().trim().min(1).max(50),
+      nota: z.string().trim().min(1).max(200),
     }).parse(data)
   )
   .handler(async ({ data }) => {
     // Gênero validado por allowlist (unissex = sem filtro; específico + unissex).
     const targetGenero = resolveGenero(data.genero);
-    let query = supabase.from("perfumes").select("*");
-
-    if (targetGenero !== "unissex") {
-      query = query.in("genero", [targetGenero, "unissex"]);
-    }
-
-    const { data: candidates, error } = await query
-      .order("avaliacao", { ascending: false, nullsFirst: false })
-      .order("numero_avaliacoes", { ascending: false, nullsFirst: false })
-      .limit(1000);
-    if (error) throw new Error(error.message);
+    // Pool ampliado: 3 páginas de 1000 (limite por requisição) em paralelo.
+    const page = (from: number) => {
+      let q = supabase.from("perfumes").select(CANDIDATE_COLS);
+      if (targetGenero !== "unissex") q = q.in("genero", [targetGenero, "unissex"]);
+      return q
+        .order("numero_avaliacoes", { ascending: false, nullsFirst: false })
+        .order("id", { ascending: true })
+        .range(from, from + 999);
+    };
+    const pages = await Promise.all([0, 1000, 2000].map(page));
+    const err = pages.find((r) => r.error)?.error;
+    if (err) throw new Error(err.message);
+    const candidates = pages.flatMap((r) => r.data ?? []);
 
     if (!candidates || candidates.length === 0) {
       return [];
@@ -133,7 +163,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
       ocasiao: data.ocasiao,
       intensidade: data.intensidade,
       nota: data.nota,
-    }).slice(0, 15) as ScoredPerfume[];
+    }).slice(0, 36) as ScoredPerfume[];
   });
 
 export const getPerfumesByNames = createServerFn({ method: "GET" })
