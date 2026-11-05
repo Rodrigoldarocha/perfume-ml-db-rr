@@ -6,6 +6,7 @@ import { Layout } from "@/components/Layout";
 import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { recommendationSearchSchema } from "@/lib/quiz";
+import { useState } from "react";
 
 const searchSchema = recommendationSearchSchema;
 
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/recomendacoes")({
 
 function Recomendacoes() {
   const search = Route.useSearch();
+  const [visible, setVisible] = useState(12);
   const { data: recommendations, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["recommendations", search],
     queryFn: () => getRecommendations({ data: search }),
@@ -69,7 +71,7 @@ function Recomendacoes() {
 
         {recommendations && recommendations.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {recommendations.map((perfume, i) => (
+            {recommendations.slice(0, visible).map((perfume, i) => (
               <div
                 key={perfume.id}
                 className="relative group animate-rise"
@@ -86,7 +88,15 @@ function Recomendacoes() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : null}
+        {recommendations && recommendations.length > visible && (
+          <div className="mt-12 text-center">
+            <Button variant="outline" onClick={() => setVisible((v) => v + 12)} className="rounded-none uppercase tracking-widest text-xs">
+              Carregar mais
+            </Button>
+          </div>
+        )}
+        {recommendations && recommendations.length > 0 ? null : (
           <div className="text-center py-20">
             <p className="text-muted-foreground font-light text-xl">
               {isError ? "Ocorreu um erro ao carregar as recomendações." : "Não conseguimos encontrar recomendações exatas no momento."}
