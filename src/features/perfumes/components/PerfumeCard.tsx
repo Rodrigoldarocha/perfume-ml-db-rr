@@ -24,8 +24,12 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
     >
       <Card className="h-full overflow-hidden rounded-md border-0 bg-white">
         <div
-          className="aspect-[3/4] relative overflow-hidden"
-          style={{ backgroundColor: liquidTint(liquid) }}
+          className="aspect-[3/4] relative overflow-hidden isolate"
+          style={{
+            backgroundColor: liquidTint(liquid),
+            backgroundImage:
+              "radial-gradient(circle at 50% 42%, rgb(255 255 255 / 0.65) 0%, rgb(255 255 255 / 0) 68%)",
+          }}
         >
           {perfume.imagem_url && imgOk ? (
             <img
@@ -34,11 +38,11 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
               loading="lazy"
               decoding="async"
               onError={() => setImgOk(false)}
-              className="absolute inset-0 w-full h-full object-contain p-5"
+              className="absolute inset-0 w-full h-full object-contain p-5 mix-blend-multiply"
             />
           ) : (
-            <div className="absolute inset-0 flex items-end p-4">
-              <p className="txt-display text-lg leading-snug" style={{ color: liquid }}>
+            <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+              <p className="txt-display text-base leading-snug text-foreground/70">
                 {perfume.nome}
               </p>
             </div>

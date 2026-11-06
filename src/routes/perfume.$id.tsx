@@ -90,19 +90,23 @@ function PerfumeDetail() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-14">
           <div
-            className="aspect-[3/4] relative overflow-hidden rounded-md"
-            style={{ backgroundColor: liquidTint(liquid) }}
+            className="aspect-[3/4] relative overflow-hidden isolate rounded-md"
+            style={{
+              backgroundColor: liquidTint(liquid),
+              backgroundImage:
+                "radial-gradient(circle at 50% 42%, rgb(255 255 255 / 0.65) 0%, rgb(255 255 255 / 0) 68%)",
+            }}
           >
             {perfume.imagem_url && imgOk ? (
               <img
                 src={perfume.imagem_url}
                 alt={`${perfume.marca} ${perfume.nome}`}
                 onError={() => setImgOk(false)}
-                className="absolute inset-0 w-full h-full object-contain p-8"
+                className="absolute inset-0 w-full h-full object-contain p-8 mix-blend-multiply"
               />
             ) : (
-              <div className="absolute inset-0 flex items-end p-6">
-                <p className="txt-display text-3xl leading-tight" style={{ color: liquid }}>
+              <div className="absolute inset-0 flex items-center justify-center p-8 text-center">
+                <p className="txt-display text-3xl leading-tight text-foreground/70">
                   {perfume.nome}
                 </p>
               </div>

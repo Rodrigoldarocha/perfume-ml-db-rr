@@ -30,7 +30,7 @@ export function Layout({
               loading="eager"
               decoding="async"
               fetchPriority="high"
-              className="h-8 w-8 shrink-0 object-contain"
+              className="h-9 w-9 shrink-0 rounded-full object-contain"
             />
             <span className="txt-display text-xl leading-none">ParfumSeg</span>
           </Link>
@@ -95,7 +95,7 @@ export function Layout({
               height={28}
               loading="lazy"
               decoding="async"
-              className="h-7 w-7 shrink-0 object-contain"
+              className="h-8 w-8 shrink-0 rounded-full object-contain"
             />
             <span className="txt-display text-lg">ParfumSeg</span>
           </div>
