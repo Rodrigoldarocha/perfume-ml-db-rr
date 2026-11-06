@@ -17,17 +17,17 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 font-sans">
       <div className="max-w-md text-center">
-        <h1 className="text-8xl font-serif text-primary opacity-10">404</h1>
-        <h2 className="mt-4 text-2xl font-serif text-primary uppercase tracking-widest">Página não encontrada</h2>
-        <p className="mt-4 text-sm text-muted-foreground font-light leading-relaxed">
-          O aroma que você procura parece ter se dissipado. Talvez a página tenha sido movida ou não exista mais.
+        <h1 className="text-8xl txt-display text-primary opacity-10">404</h1>
+        <h2 className="mt-4 text-2xl txt-display">Página não encontrada</h2>
+        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+          Essa página não existe. Volte ao catálogo para continuar procurando.
         </p>
         <div className="mt-10">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-none bg-primary px-8 py-3 text-xs font-light uppercase tracking-widest text-primary-foreground transition-all hover:bg-primary/90 shadow-sm"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Voltar ao Início
+            Voltar ao catálogo
           </Link>
         </div>
       </div>
@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "theme-color", content: "#35322e" },
+      { name: "theme-color", content: "#1c2236" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -95,6 +95,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "icon", href: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
@@ -113,13 +119,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function PendingComponent() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 bg-background px-4">
-      <span className="font-serif text-2xl uppercase tracking-[0.1em] text-primary">
+      <span className="txt-display text-2xl text-primary">
         ParfumSeg
       </span>
       <div className="boot-bar" aria-hidden="true">
         <span />
       </div>
-      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Carregando…
       </p>
     </div>
@@ -134,7 +140,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         <div id="boot-splash" aria-hidden="true">
-          <span style={{ fontFamily: "Georgia, serif", fontSize: "1.75rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          <span className="txt-display" style={{ fontSize: "1.75rem" }}>
             ParfumSeg
           </span>
           <div className="boot-bar">

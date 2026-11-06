@@ -45,55 +45,57 @@ function Similares() {
 
   return (
     <Layout>
-      <section className="bg-primary/5 py-20 mb-12">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h1 className="text-4xl md:text-5xl font-serif mb-6 text-primary uppercase tracking-wider">Perfumes Parecidos</h1>
-          <p className="text-muted-foreground font-light mb-8">Digite um perfume que você já ama e veja os mais parecidos.</p>
-          <div className="relative text-left">
-            <Input
-              value={term}
-              maxLength={100}
-              onChange={(e) => setTerm(e.target.value)}
-              placeholder="Ex.: Sauvage, La Vie Est Belle..."
-              className="rounded-none h-12 bg-background"
-              aria-label="Buscar perfume de referência"
-            />
-            {debounced.trim().length >= 2 && busca.data && (
-              <ul className="absolute z-20 left-0 right-0 mt-1 bg-background border border-primary/10 shadow-sm">
-                {busca.data.perfumes.length === 0 && (
-                  <li className="p-3 text-sm text-muted-foreground">Nenhum perfume encontrado.</li>
-                )}
-                {busca.data.perfumes.map((p) => (
-                  <li key={p.id}>
-                    <button
-                      className="w-full text-left p-3 text-sm hover:bg-primary/5"
-                      onClick={() => {
-                        setTerm("");
-                        navigate({ search: { ref: p.id } });
-                      }}
-                    >
-                      <span className="font-medium">{p.nome}</span>
-                      <span className="text-muted-foreground"> — {p.marca}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+      <section className="container mx-auto px-4 pt-8 pb-10 max-w-2xl">
+        <h1 className="text-3xl md:text-4xl txt-display mb-2">Perfumes parecidos</h1>
+        <p className="text-muted-foreground mb-6">
+          Busque um perfume que você já gosta e veja os mais parecidos.
+        </p>
+        <div className="relative text-left">
+          <Input
+            value={term}
+            maxLength={100}
+            onChange={(e) => setTerm(e.target.value)}
+            placeholder="Ex.: Sauvage, La Vie Est Belle…"
+            className="rounded-md h-11 bg-white"
+            aria-label="Buscar perfume de referência"
+          />
+          {debounced.trim().length >= 2 && busca.data && (
+            <ul className="absolute z-20 left-0 right-0 mt-1 bg-white border rounded-md overflow-hidden">
+              {busca.data.perfumes.length === 0 && (
+                <li className="p-3 text-sm text-muted-foreground">
+                  Nenhum perfume encontrado. Tente outro nome.
+                </li>
+              )}
+              {busca.data.perfumes.map((p) => (
+                <li key={p.id}>
+                  <button
+                    className="w-full text-left p-3 text-sm hover:bg-primary/[0.04]"
+                    onClick={() => {
+                      setTerm("");
+                      navigate({ search: { ref: p.id } });
+                    }}
+                  >
+                    <span className="font-medium">{p.nome}</span>
+                    <span className="text-muted-foreground"> — {p.marca}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
       <div className="container mx-auto px-4 pb-32">
         {similares.isLoading && (
-          <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-primary opacity-30" /></div>
+          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" aria-hidden="true" /></div>
         )}
         {similares.isError && <p className="text-center text-muted-foreground">Não foi possível carregar os parecidos.</p>}
         {similares.data && (
           <>
-            <h2 className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-8 border-b border-primary/10 pb-4">
-              Parecidos com <span className="text-primary font-medium">{similares.data.referencia.nome}</span> ({similares.data.similares.length})
+            <h2 className="text-base font-semibold mb-6 pb-4 border-b">
+              Parecidos com <span className="text-primary">{similares.data.referencia.nome}</span> ({similares.data.similares.length})
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
               {similares.data.similares.map((p) => <PerfumeCard key={p.id} perfume={p} />)}
             </div>
           </>

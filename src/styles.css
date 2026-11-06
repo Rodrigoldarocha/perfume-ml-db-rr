@@ -5,74 +5,22 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition - PerfumSeg.
- *
- * Distinctive palette evoking olfactory experience:
- * - No template defaults: no warm cream #F4F1EA + terracotta,
- *   no near-black + acid-green, no SaaS-card kit patterns.
- * - Colors encode fragrance character: depth, freshness, warmth.
- * - Accent used sparingly as deliberate focal point.
- *
- * @theme inline maps CSS custom properties to Tailwind utilities.
- * :root and .dark blocks define values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light) and .dark (dark)
- * 2. Register in @theme inline as --color-<name>: var(--<name>)
+ * ParfumSeg — design tokens.
+ * Light-only palette: cool gray-blue page (#f6f7fa), white surfaces,
+ * ink text (#1c2236), single blue accent (#2f3fd1).
+ * One typeface (Bricolage Grotesque), 6px radius everywhere, no shadows.
  */
 
-/* ------------------------------------------------------------
-   PerfumSeg — Frontend Design System
-   ============================================================
-   
-   Goal: Distinctive visual identity for a perfume catalog & recommender.
-   Rejecting template defaults (SaaS-card kit, template chrome, generic palettes).
-   
-   COLOR PALETTE:
-   - Sophisticated base avoiding template cream/beige defaults
-   - Muted rose secondary (not template soft gold)
-   - Deliberate accent for focal points only
-   - Dark theme complementing light without inverting identically
-   
-   TYPOGRAPHY:
-   - Type scale following The Elements of Typographic Style
-   - Display type: distinctive, sets personality
-   - Body type: readable with increased line-height for sans
-   - Avoid: all-caps labels unless justified, single-word accenting, unnecessary labels
-   
-   LAYOUT:
-   - Visual structure encodes information, not just decoration
-   - One memorable element per page; everything else quiet & disciplined
-   - Avoid identical rounded cards (SaaS-card kit pattern)
-   - Avoid template chrome (ALL-CAPS eyebrows, middle dots, spaced em dashes)
-   
-   MOTION:
-   - Deliberate, not scattered; one orchestrated moment per page
-   - Motion answers user action, not decoration
-   - Reduced motion respects prefers-reduced-motion
-   
-   WRITTEN CONTENT:
-   - In Portuguese: legible, specific, conversational tone
-   - Content is design: every word earns its place
-   - Active voice for CTAs and feedback
-   
-   ACCESSIBILITY:
-   - Focus-visible rings respecting palette
-   - 44px minimum touch targets
-   - Respect prefers-reduced-motion
-   - Color contrast sufficient in both light/dark
-   
-   ============================================================ */
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+  --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -110,78 +58,78 @@
 }
 
 :root {
-  --radius: 0rem;
-  --background: oklch(0.97 0.008 40); /* Sophisticated warm white, not template cream */
-  --foreground: oklch(0.25 0.03 40);
+  --radius: 6px;
+  --background: oklch(0.974 0.006 265); /* #f6f7fa */
+  --foreground: oklch(0.235 0.05 265); /* #1c2236 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.03 40);
+  --card-foreground: oklch(0.235 0.05 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.03 40);
-  --primary: oklch(0.3 0.05 20); /* Deep charcoal with hue, not template near-black */
-  --primary-foreground: oklch(0.97 0.008 40);
-  --secondary: oklch(0.85 0.06 35); /* Muted rose gold, not template soft gold */
-  --secondary-foreground: oklch(0.25 0.03 40);
-  --muted: oklch(0.93 0.01 40);
-  --muted-foreground: oklch(0.45 0.03 40);
-  --accent: oklch(0.7 0.18 25); /* Deliberate sensory accent, not template terracotta/acid-green */
-  --accent-foreground: oklch(0.97 0.008 40);
+  --popover-foreground: oklch(0.235 0.05 265);
+  --primary: oklch(0.42 0.18 270); /* #2f3fd1 */
+  --primary-foreground: oklch(0.99 0.003 265);
+  --secondary: oklch(0.955 0.006 265);
+  --secondary-foreground: oklch(0.235 0.05 265);
+  --muted: oklch(0.955 0.006 265);
+  --muted-foreground: oklch(0.48 0.02 265); /* AA on background */
+  --accent: oklch(0.93 0.03 270);
+  --accent-foreground: oklch(0.235 0.05 265);
   --destructive: oklch(0.55 0.15 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.88 0.02 40);
-  --input: oklch(0.95 0.01 40);
-  --ring: oklch(0.3 0.05 20);
-  --chart-1: oklch(0.65 0.2 35);
+  --border: oklch(0.92 0.008 265);
+  --input: oklch(0.93 0.006 265);
+  --ring: oklch(0.42 0.18 270);
+  --chart-1: oklch(0.42 0.18 270);
   --chart-2: oklch(0.55 0.15 170);
   --chart-3: oklch(0.45 0.15 210);
   --chart-4: oklch(0.75 0.2 80);
   --chart-5: oklch(0.65 0.2 55);
-  --sidebar: oklch(0.96 0.006 38);
-  --sidebar-foreground: oklch(0.25 0.03 40);
-  --sidebar-primary: oklch(0.3 0.05 20);
-  --sidebar-primary-foreground: oklch(0.97 0.008 40);
-  --sidebar-accent: oklch(0.85 0.06 35);
-  --sidebar-accent-foreground: oklch(0.25 0.03 40);
-  --sidebar-border: oklch(0.88 0.02 40);
-  --sidebar-ring: oklch(0.3 0.05 20);
-  --note: oklch(0.9 0.08 330); /* Note-like accent for highlights */
-  --note-foreground: oklch(0.3 0.05 20);
+  --sidebar: oklch(0.974 0.006 265);
+  --sidebar-foreground: oklch(0.235 0.05 265);
+  --sidebar-primary: oklch(0.42 0.18 270);
+  --sidebar-primary-foreground: oklch(0.99 0.003 265);
+  --sidebar-accent: oklch(0.93 0.03 270);
+  --sidebar-accent-foreground: oklch(0.235 0.05 265);
+  --sidebar-border: oklch(0.92 0.008 265);
+  --sidebar-ring: oklch(0.42 0.18 270);
+  --note: oklch(0.42 0.18 270);
+  --note-foreground: oklch(0.99 0.003 265);
 }
 
 .dark {
-  --background: oklch(0.2 0.03 30); /* Sophisticated dark, not template near-black */
-  --foreground: oklch(0.95 0.01 50);
-  --card: oklch(0.25 0.03 32);
-  --card-foreground: oklch(0.95 0.01 50);
-  --popover: oklch(0.25 0.03 32);
-  --popover-foreground: oklch(0.95 0.01 50);
-  --primary: oklch(0.85 0.04 340); /* Warm charcoal in dark, inverted from light */
-  --primary-foreground: oklch(0.2 0.03 32);
-  --secondary: oklch(0.55 0.08 20); /* Muted rose in dark */
-  --secondary-foreground: oklch(0.95 0.01 50);
-  --muted: oklch(0.35 0.05 30);
-  --muted-foreground: oklch(0.65 0.04 260);
-  --accent: oklch(0.65 0.2 30); /* Accent preserved in dark */
-  --accent-foreground: oklch(0.95 0.01 50);
+  --background: oklch(0.22 0.03 265);
+  --foreground: oklch(0.974 0.006 265);
+  --card: oklch(0.27 0.03 265);
+  --card-foreground: oklch(0.974 0.006 265);
+  --popover: oklch(0.27 0.03 265);
+  --popover-foreground: oklch(0.974 0.006 265);
+  --primary: oklch(0.7 0.15 270);
+  --primary-foreground: oklch(0.22 0.03 265);
+  --secondary: oklch(0.32 0.03 265);
+  --secondary-foreground: oklch(0.974 0.006 265);
+  --muted: oklch(0.32 0.03 265);
+  --muted-foreground: oklch(0.72 0.02 265);
+  --accent: oklch(0.35 0.06 270);
+  --accent-foreground: oklch(0.974 0.006 265);
   --destructive: oklch(0.6 0.2 20);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.5 0.04 340);
-  --chart-1: oklch(0.5 0.25 30);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.7 0.15 270);
+  --chart-1: oklch(0.7 0.15 270);
   --chart-2: oklch(0.45 0.18 180);
   --chart-3: oklch(0.55 0.18 220);
   --chart-4: oklch(0.65 0.25 80);
   --chart-5: oklch(0.55 0.2 50);
-  --sidebar: oklch(0.25 0.03 32);
-  --sidebar-foreground: oklch(0.95 0.01 50);
-  --sidebar-primary: oklch(0.85 0.04 340);
-  --sidebar-primary-foreground: oklch(0.2 0.03 32);
-  --sidebar-accent: oklch(0.55 0.08 20);
-  --sidebar-accent-foreground: oklch(0.95 0.01 50);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.5 0.04 340);
-  --note: oklch(0.6 0.15 330);
-  --note-foreground: oklch(0.85 0.04 50);
+  --sidebar: oklch(0.27 0.03 265);
+  --sidebar-foreground: oklch(0.974 0.006 265);
+  --sidebar-primary: oklch(0.7 0.15 270);
+  --sidebar-primary-foreground: oklch(0.22 0.03 265);
+  --sidebar-accent: oklch(0.35 0.06 270);
+  --sidebar-accent-foreground: oklch(0.974 0.006 265);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.7 0.15 270);
+  --note: oklch(0.7 0.15 270);
+  --note-foreground: oklch(0.22 0.03 265);
 }
 
 @layer base {
@@ -189,9 +137,15 @@
     border-color: var(--color-border);
   }
 
+  html {
+    font-family: var(--font-sans);
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 
   :focus-visible {
@@ -205,38 +159,18 @@
   }
 }
 
-/* ---------- Typographic scale & typeface rules ---------- */
-/* Following The Elements of Typographic Style guidance:
-   - line lengths < 80 chars (serif can be slightly longer)
-   - serif body text needs slightly more line-height than sans-serif
-   - one family or two clearly distinct
-   - avoid: single-word accenting, all-caps labels, unnecessary labels
-*/
-
+/* Display type: bold, slightly negative tracking */
 .txt-display {
-  font-weight: 600;
-  line-height: 1.25;
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: -0.02em;
 }
-.txt-display-sm { font-size: 2rem; }   /* ~32px */
-.txt-display-md { font-size: 3rem; }   /* ~48px */
-.txt-display-lg { font-size: 4.5rem; } /* ~72px */
 
 .txt-body {
   font-weight: 400;
-  line-height: 1.6;  /* More leading for sans-serif per ETOTS */
-  letter-spacing: 0.01em;
+  line-height: 1.6;
 }
-.txt-body-sm { font-size: 0.875rem; } /* ~14px */
-.txt-body-md { font-size: 1rem; }     /* ~16px */
-.txt-body-lg { font-size: 1.125rem; } /* ~18px */
 
-/* Avoid template-default treatments */
-.uppercase-label {
-  text-transform: uppercase;
-  /* AVOID: using all caps just for labels; only if truly justified for this brief */
-  letter-spacing: 0.05em;
-}
 .caption {
   font-size: 0.75rem;
   font-weight: 500;
@@ -244,9 +178,15 @@
   line-height: 1.4;
 }
 
-/* Line length control: cap at ~75 chars for body */
-@media (min-width: 640px) {
-  .max-body { max-width: 64rem; } /* ~64ch ≈ 75 words at typical width */
+/* Card lift: motion only on hover, only when user allows it */
+.card-rise {
+  transition: transform 150ms ease;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .card-rise:hover {
+    transform: translateY(-3px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -257,9 +197,13 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .card-rise:hover {
+    transform: none;
+  }
 }
 
-/* Boot splash (removido após hidratação) + loader de transição de rota */
+/* Boot splash (removed after hydration) + route transition loader */
 #boot-splash {
   position: fixed;
   inset: 0;
@@ -269,8 +213,8 @@
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  background-color: #35322e;
-  color: #faf7f2;
+  background-color: #1c2236;
+  color: #f6f7fa;
   transition: opacity 0.35s ease;
 }
 
@@ -283,14 +227,14 @@
   width: 11rem;
   height: 2px;
   overflow: hidden;
-  background: rgb(250 247 242 / 15%);
+  background: rgb(246 247 250 / 15%);
 }
 
 .boot-bar > span {
   display: block;
   height: 100%;
   width: 40%;
-  background: #d4be96;
+  background: #2f3fd1;
   animation: boot-slide 1.1s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 

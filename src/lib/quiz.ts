@@ -7,6 +7,8 @@ export interface QuizStep {
   /** Máximo de opções selecionáveis (padrão 1). */
   multi?: number;
   options: string[];
+  /** Subtexto opcional por opção, exibido em cinza abaixo do rótulo. */
+  subtexts?: Record<string, string>;
 }
 
 export const QUIZ_STEPS: QuizStep[] = [
@@ -21,10 +23,21 @@ export const QUIZ_STEPS: QuizStep[] = [
   {
     title: "Para qual ocasião você procura o perfume?",
     options: ["Dia a dia", "Trabalho", "Noite/Festas", "Encontros"],
+    subtexts: {
+      "Dia a dia": "trabalho, faculdade, rotina",
+      Trabalho: "reuniões, escritório",
+      "Noite/Festas": "saída, comemoração",
+      Encontros: "jantar, ocasião especial",
+    },
   },
   {
     title: "Qual a intensidade desejada?",
     options: ["Suave", "Moderada", "Intensa/Marcante"],
+    subtexts: {
+      Suave: "leve, perto do corpo",
+      Moderada: "equilibrada no dia a dia",
+      "Intensa/Marcante": "forte e duradoura",
+    },
   },
   {
     title: "Quais notas você prefere? (até 3)",

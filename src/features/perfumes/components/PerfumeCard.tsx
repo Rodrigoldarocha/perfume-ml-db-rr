@@ -2,21 +2,31 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Perfume } from "@/types/perfume";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
+import { liquidColor, liquidTint } from "@/lib/utils";
 
 interface PerfumeCardProps {
   perfume: Perfume;
 }
 
+const formatNota = (value: number) => value.toFixed(1).replace(".", ",");
+
 export function PerfumeCard({ perfume }: PerfumeCardProps) {
   const [imgOk, setImgOk] = useState(Boolean(perfume.imagem_url));
+  const liquid = liquidColor(perfume.acordes_principais ?? []);
 
   return (
-    <Link to="/perfume/$id" params={{ id: perfume.id.toString() }} preload="intent" className="block group">
-      <Card className="h-full overflow-hidden border-0 rounded-2xl bg-background/50 transition-all hover:bg-background/60 group-hover:shadow-xl transition-shadow">
-        <div className="aspect-[3/4] bg-muted relative overflow-hidden">
-          {/* Foto real do frasco com lazy loading, ou degradê decorativo como fallback */}
+    <Link
+      to="/perfume/$id"
+      params={{ id: perfume.id.toString() }}
+      preload="intent"
+      className="block group card-rise rounded-md"
+    >
+      <Card className="h-full overflow-hidden rounded-md border-0 bg-white">
+        <div
+          className="aspect-[3/4] relative overflow-hidden"
+          style={{ backgroundColor: liquidTint(liquid) }}
+        >
           {perfume.imagem_url && imgOk ? (
             <img
               src={perfume.imagem_url}
@@ -24,38 +34,27 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
               loading="lazy"
               decoding="async"
               onError={() => setImgOk(false)}
-              className="absolute inset-0 w-full h-full object-cover group-hover:opacity-95 transition-opacity duration-500"
+              className="absolute inset-0 w-full h-full object-contain p-5"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center p-6">
-              <div className="text-center">
-                <span className="text-4xl font-display text-primary/60">💫</span>
-                <p className="txt-body mt-2 text-primary/40">Fragrância</p>
-              </div>
+            <div className="absolute inset-0 flex items-end p-4">
+              <p className="txt-display text-lg leading-snug" style={{ color: liquid }}>
+                {perfume.nome}
+              </p>
             </div>
           )}
         </div>
         <CardContent className="p-4">
-          <span className="txt-body text-[10px] uppercase tracking-[0.15em] text-primary/60 block mb-1">{perfume.marca}</span>
-          <h3 className="txt-display font-serif text-lg leading-tight mb-3">{perfume.nome}</h3>
-          <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-muted-foreground block mb-0.5">{perfume.marca}</span>
+          <h3 className="txt-display text-base leading-snug">{perfume.nome}</h3>
+          <div className="mt-2.5 flex items-center justify-between text-sm">
+            <span className="text-muted-foreground capitalize">{perfume.genero}</span>
             {perfume.avaliacao != null && (
-              <div className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-primary text-primary" />
-                <span className="txt-body-sm">{perfume.avaliacao.toFixed(1)}</span>
-              </div>
+              <span className="inline-flex items-center gap-1 font-medium">
+                <Star className="w-3.5 h-3.5 fill-primary text-primary" aria-hidden="true" />
+                {formatNota(perfume.avaliacao)}
+              </span>
             )}
-            <div className="flex items-center gap-2">
-              {(perfume.acordes_principais ?? []).slice(0, 2).map((acorde: string, i: number) => (
-                <Badge
-                  key={i}
-                  variant="outline"
-                  className="txt-body text-[9px] uppercase font-light tracking-wider rounded-none border-transparent hover:border-primary/30 hover:text-primary transition-colors px-2 py-0.5"
-                >
-                  {acorde}
-                </Badge>
-              ))}
-            </div>
           </div>
         </CardContent>
       </Card>

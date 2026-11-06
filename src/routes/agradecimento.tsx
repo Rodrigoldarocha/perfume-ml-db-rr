@@ -15,13 +15,13 @@ function Thanks() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-32 text-center">
-        <CheckCircle2 className="w-16 h-16 text-primary mx-auto mb-8 opacity-20" />
-        <h1 className="text-4xl font-serif text-primary mb-6 uppercase tracking-widest">Obrigado!</h1>
-        <p className="text-muted-foreground font-light mb-12 max-w-md mx-auto">
-          Sua mensagem foi recebida com sucesso. Nossa equipe entrará em contato em breve.
+        <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-6" aria-hidden="true" />
+        <h1 className="text-3xl txt-display mb-4">Mensagem enviada</h1>
+        <p className="text-muted-foreground mb-10 max-w-md mx-auto">
+          Recebemos sua mensagem e vamos responder em breve.
         </p>
-        <Button asChild className="rounded-none uppercase tracking-widest px-8">
-          <Link to="/">Voltar ao Catálogo</Link>
+        <Button asChild className="px-6">
+          <Link to="/">Voltar ao catálogo</Link>
         </Button>
       </div>
     </Layout>

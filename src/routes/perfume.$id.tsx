@@ -3,17 +3,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { getPerfumeById, getPerfumesByNames } from "@/services/perfume.functions";
 import { Layout } from "@/components/Layout";
-import { Badge } from "@/components/ui/badge";
 import { Star, ExternalLink, ChevronRight, Home } from "lucide-react";
-import { 
-  Breadcrumb, 
-  BreadcrumbItem, 
-  BreadcrumbLink, 
-  BreadcrumbList, 
-  BreadcrumbPage, 
-  BreadcrumbSeparator 
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Perfume } from "@/types/perfume";
+import { liquidColor, liquidTint } from "@/lib/utils";
 
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
@@ -22,9 +22,9 @@ export const Route = createFileRoute("/perfume/$id")({
     return {
       title: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "Detalhes do Perfume | ParfumSeg",
       meta: [
-        { name: "description", content: data ? `Descubra as notas de ${data.nome} da ${data.marca}. Acordes: ${(data.acordes_principais ?? []).join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
-        { property: "og:title", content: data ? `${data.nome} - ${data.marca} | Pirâmide Olfativa` : "ParfumSeg | Catálogo de Perfumes" },
-        { property: "og:description", content: data ? `Explore a composição detalhada e encontre fragrâncias parecidas com ${data.nome}.` : "Explore 24.000+ fragrâncias traduzidas." },
+        { name: "description", content: data ? `Notas de ${data.nome} da ${data.marca}. Acordes: ${(data.acordes_principais ?? []).join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
+        { property: "og:title", content: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "ParfumSeg | Catálogo de Perfumes" },
+        { property: "og:description", content: data ? `Composição detalhada de ${data.nome} e fragrâncias parecidas.` : "Mais de 24.000 fragrâncias traduzidas." },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" }
       ]
@@ -35,6 +35,11 @@ export const Route = createFileRoute("/perfume/$id")({
     return getPerfumeById({ data: params.id });
   }
 });
+
+const BARRAS = [92, 74, 58, 46, 36, 28, 22];
+const formatNota = (value: number) => value.toFixed(1).replace(".", ",");
+
+const cap = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 function PerfumeDetail() {
   const { id } = Route.useParams();
@@ -55,158 +60,169 @@ function PerfumeDetail() {
   });
   const similaresByName = new Map((similares ?? []).map((s) => [s.nome, s]));
 
+  const liquid = liquidColor(perfume.acordes_principais ?? []);
+  const perfumistas = [perfume.perfumista_1, perfume.perfumista_2].filter(Boolean).join(", ");
+  const temNotas =
+    (perfume.notas_saida?.length ?? 0) > 0 ||
+    (perfume.notas_coracao?.length ?? 0) > 0 ||
+    (perfume.notas_fundo?.length ?? 0) > 0;
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <Breadcrumb className="mb-8">
-          <BreadcrumbList className="uppercase tracking-[0.2em] text-[10px]">
+          <BreadcrumbList className="text-sm text-muted-foreground">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/" className="flex items-center gap-1"><Home className="w-3 h-3" /> Início</Link>
+                <Link to="/" className="flex items-center gap-1">
+                  <Home className="w-3.5 h-3.5" aria-hidden="true" /> Catálogo
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
-              <ChevronRight className="w-3 h-3" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/">Catálogo</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="w-3 h-3" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-primary font-medium">{perfume.nome}</BreadcrumbPage>
+              <BreadcrumbPage className="text-foreground">{perfume.nome}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-          {/* Image Placeholder Area */}
-          <div className="aspect-[3/4] bg-muted flex items-center justify-center border border-primary/5 relative overflow-hidden group/img">
-            {/* Foto real do frasco, com degradê decorativo como fallback */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-14">
+          <div
+            className="aspect-[3/4] relative overflow-hidden rounded-md"
+            style={{ backgroundColor: liquidTint(liquid) }}
+          >
             {perfume.imagem_url && imgOk ? (
               <img
                 src={perfume.imagem_url}
                 alt={`${perfume.marca} ${perfume.nome}`}
                 onError={() => setImgOk(false)}
-                className="absolute inset-0 w-full h-full object-contain p-8 group-hover/img:scale-[1.04] transition-transform duration-1000"
+                className="absolute inset-0 w-full h-full object-contain p-8"
               />
             ) : (
-              <div className="absolute inset-0 opacity-20 grayscale-0 transition-transform duration-1000">
-                <div className="w-full h-full bg-[radial-gradient(circle_at_center,_var(--color-primary)_0%,_transparent_70%)]" />
+              <div className="absolute inset-0 flex items-end p-6">
+                <p className="txt-display text-3xl leading-tight" style={{ color: liquid }}>
+                  {perfume.nome}
+                </p>
               </div>
             )}
           </div>
 
-          {/* Info Area */}
           <div className="flex flex-col">
-            <div className="mb-8">
-              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground block mb-2">{perfume.marca}</span>
-              <h1 className="text-4xl font-serif text-primary uppercase tracking-wider">{perfume.nome}</h1>
+            <div className="mb-5">
+              <p className="text-sm text-muted-foreground mb-1">{perfume.marca}</p>
+              <h1 className="text-4xl md:text-5xl txt-display">{perfume.nome}</h1>
             </div>
-            <div className="mb-8 border-b border-primary/10 pb-6">
-              <div className="flex items-center justify-between mb-4">
-                <Badge variant="outline" className="rounded-none uppercase tracking-widest font-light border-primary/20">
-                  {perfume.genero}
-                </Badge>
-                {perfume.avaliacao && (
-                  <div className="flex items-center gap-2">
-                    <Star className="w-5 h-5 fill-primary text-primary" />
-                    <span className="text-xl font-light">{perfume.avaliacao.toFixed(1)}</span>
-                    <span className="text-xs text-muted-foreground font-light">({perfume.numero_avaliacoes} votos)</span>
+
+            <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-sm text-muted-foreground mb-8 pb-6 border-b">
+              <span>Gênero {cap(perfume.genero)}</span>
+              {perfume.ano_lancamento && <span>Lançamento {perfume.ano_lancamento}</span>}
+              {perfume.pais_origem && <span>Origem {perfume.pais_origem}</span>}
+              {perfume.avaliacao != null && (
+                <span className="text-foreground font-medium">
+                  Nota {formatNota(perfume.avaliacao)}
+                  <span className="text-muted-foreground font-normal">
+                    {" "}
+                    ({perfume.numero_avaliacoes ?? 0} votos)
+                  </span>
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-9">
+              {(perfume.acordes_principais ?? []).length > 0 && (
+                <section aria-labelledby="acordes-titulo">
+                  <h2 id="acordes-titulo" className="txt-display text-lg mb-4">
+                    Acordes
+                  </h2>
+                  <div className="space-y-3.5">
+                    {perfume.acordes_principais.map((acorde, i) => (
+                      <div key={acorde}>
+                        <p className="text-sm font-medium mb-1.5">{acorde}</p>
+                        <div
+                          className="h-2 w-full overflow-hidden rounded-md bg-black/[0.06]"
+                          role="img"
+                          aria-label={`${acorde}: acorde ${i + 1} de ${perfume.acordes_principais.length}`}
+                        >
+                          <div
+                            className="h-full rounded-md"
+                            style={{
+                              width: `${BARRAS[i] ?? 18}%`,
+                              backgroundColor: liquid,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                </section>
+              )}
+
+              {temNotas && (
+                <section aria-labelledby="notas-titulo">
+                  <h2 id="notas-titulo" className="txt-display text-lg mb-4">
+                    Notas
+                  </h2>
+                  <dl className="space-y-3 text-sm">
+                    {(perfume.notas_saida?.length ?? 0) > 0 && (
+                      <div className="flex gap-3">
+                        <dt className="w-16 shrink-0 font-semibold">Saída</dt>
+                        <dd className="text-muted-foreground">{perfume.notas_saida.join(", ")}</dd>
+                      </div>
+                    )}
+                    {(perfume.notas_coracao?.length ?? 0) > 0 && (
+                      <div className="flex gap-3">
+                        <dt className="w-16 shrink-0 font-semibold">Coração</dt>
+                        <dd className="text-muted-foreground">{perfume.notas_coracao.join(", ")}</dd>
+                      </div>
+                    )}
+                    {(perfume.notas_fundo?.length ?? 0) > 0 && (
+                      <div className="flex gap-3">
+                        <dt className="w-16 shrink-0 font-semibold">Fundo</dt>
+                        <dd className="text-muted-foreground">{perfume.notas_fundo.join(", ")}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </section>
+              )}
+
+              <div className="space-y-2 pt-6 border-t">
+                {perfumistas && (
+                  <p className="text-sm text-muted-foreground">Perfumista {perfumistas}</p>
                 )}
-              </div>
-              <p className="text-muted-foreground font-light italic">
-                Lançado em {perfume.ano_lancamento || "Ano desconhecido"}
-                {perfume.pais_origem && ` • ${perfume.pais_origem}`}
-              </p>
-            </div>
-
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-xs uppercase tracking-[0.2em] text-primary font-medium mb-4">Acordes Principais</h3>
-                <div className="flex flex-wrap gap-2">
-                  {perfume.acordes_principais.map((acorde) => (
-                    <Badge key={acorde} variant="secondary" className="rounded-none font-light tracking-wide bg-accent/20 hover:bg-accent/30 text-primary border-none">
-                      {acorde}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-xs uppercase tracking-[0.2em] text-primary font-medium mb-4">Pirâmide Olfativa</h3>
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-2">Notas de Saída</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {perfume.notas_saida.map((nota) => (
-                        <span key={nota} className="text-sm font-light px-2 py-0.5 border border-primary/10">{nota}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-2">Notas de Coração</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {perfume.notas_coracao.map((nota) => (
-                        <span key={nota} className="text-sm font-light px-2 py-0.5 border border-primary/10">{nota}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground block mb-2">Notas de Fundo</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {perfume.notas_fundo.map((nota) => (
-                        <span key={nota} className="text-sm font-light px-2 py-0.5 border border-primary/10">{nota}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-primary/10">
-                <div className="flex flex-col gap-2">
-                   <p className="text-xs font-light text-muted-foreground uppercase tracking-widest">
-                     Perfumista(s): {perfume.perfumista_1}{perfume.perfumista_2 ? `, ${perfume.perfumista_2}` : ""}{!perfume.perfumista_1 && !perfume.perfumista_2 ? "Informação não disponível" : ""}
-                   </p>
-                   {perfume.cluster_perfil && (
-                     <p className="text-xs font-light text-muted-foreground uppercase tracking-widest">
-                       Perfil: <span className="text-primary font-medium">{perfume.cluster_perfil}</span>
-                     </p>
-                   )}
-                </div>
-                
-                <a 
-                  href={perfume.url_fonte} 
-                  target="_blank" 
+                {perfume.cluster_perfil && (
+                  <p className="text-sm text-muted-foreground">
+                    Perfil olfativo {perfume.cluster_perfil}
+                  </p>
+                )}
+                <a
+                  href={perfume.url_fonte}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 mt-8 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1.5 mt-4 text-sm font-medium text-primary hover:underline"
                 >
-                  Ver fonte original no Fragrantica <ExternalLink className="w-3 h-3" />
+                  Ver no Fragrantica
+                  <ExternalLink className="w-4 h-4" aria-hidden="true" />
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Similares Section */}
-        {perfume.top5_similares && perfume.top5_similares.length > 0 && (
-          <div className="mt-24">
-            <h2 className="text-2xl font-serif text-primary uppercase tracking-widest mb-12 text-center underline underline-offset-8 decoration-primary/20">
-              Fragrâncias Similares
+        {similarNames.length > 0 && (
+          <section className="mt-16" aria-labelledby="similares-titulo">
+            <h2 id="similares-titulo" className="txt-display text-xl mb-6">
+              Perfumes parecidos
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {perfume.top5_similares.map((nomeSimilar) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {similarNames.map((nomeSimilar) => {
                 const match = similaresByName.get(nomeSimilar);
                 if (!match) {
                   return (
-                    <div key={nomeSimilar} className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm">
-                      <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">Similar</span>
-                      <h4 className="font-serif text-sm uppercase tracking-wider">{nomeSimilar}</h4>
+                    <div key={nomeSimilar} className="p-5 bg-white rounded-md">
+                      <p className="text-xs text-muted-foreground mb-1">Similar</p>
+                      <h3 className="text-sm font-medium">{nomeSimilar}</h3>
                     </div>
                   );
                 }
@@ -216,18 +232,18 @@ function PerfumeDetail() {
                     to="/perfume/$id"
                     params={{ id: match.id.toString() }}
                     preload="intent"
-                    className="p-6 bg-white border border-primary/5 text-center flex flex-col items-center justify-center aspect-square shadow-sm group hover:shadow-md transition-shadow"
+                    className="p-5 bg-white rounded-md card-rise block"
                   >
-                    <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-2">{match.marca}</span>
-                    <h4 className="font-serif text-sm uppercase tracking-wider group-hover:text-primary transition-colors">{match.nome}</h4>
+                    <p className="text-xs text-muted-foreground mb-1">{match.marca}</p>
+                    <h3 className="text-sm font-medium leading-snug">{match.nome}</h3>
                   </Link>
                 );
               })}
             </div>
-            <p className="text-[10px] text-center text-muted-foreground mt-8 uppercase tracking-widest font-light italic">
-              *Similaridades inferidas pelo nosso sistema baseado em acordes e notas.
+            <p className="text-xs text-muted-foreground mt-5">
+              Similares calculados a partir de acordes e notas.
             </p>
-          </div>
+          </section>
         )}
       </div>
     </Layout>

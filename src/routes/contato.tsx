@@ -43,44 +43,44 @@ function Contact() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-20 max-w-2xl">
-        <h1 className="text-4xl font-serif text-primary mb-8 text-center uppercase tracking-widest">Contato</h1>
-        <p className="text-muted-foreground font-light text-center mb-12">
-          Tem alguma dúvida sobre nosso catálogo ou quer sugerir um perfume? Envie uma mensagem.
+      <div className="container mx-auto px-4 py-16 max-w-2xl">
+        <h1 className="text-3xl txt-display mb-3">Contato</h1>
+        <p className="text-muted-foreground mb-10">
+          Dúvida sobre o catálogo ou sugestão de perfume? Envie uma mensagem.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 border border-primary/5 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 sm:p-8 rounded-md">
           <div className="space-y-2">
-            <Label htmlFor="name" className="uppercase text-[10px] tracking-widest font-light">Nome</Label>
-            <Input id="name" name="nome" required minLength={2} placeholder="Seu nome completo" className="rounded-none border-primary/10" maxLength={100} autoComplete="name" />
+            <Label htmlFor="name" className="text-sm font-medium">Nome</Label>
+            <Input id="name" name="nome" required minLength={2} placeholder="Seu nome completo" className="rounded-md bg-white" maxLength={100} autoComplete="name" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="uppercase text-[10px] tracking-widest font-light">E-mail</Label>
-            <Input id="email" name="email" type="email" required placeholder="seu@email.com" className="rounded-none border-primary/10" maxLength={100} autoComplete="email" />
+            <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
+            <Input id="email" name="email" type="email" required placeholder="seu@email.com" className="rounded-md bg-white" maxLength={100} autoComplete="email" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="message" className="uppercase text-[10px] tracking-widest font-light">Mensagem</Label>
-            <Textarea id="message" name="mensagem" required minLength={10} placeholder="Como podemos ajudar? (mínimo 10 caracteres)" className="rounded-none border-primary/10 min-h-[150px]" maxLength={2000} />
+            <Label htmlFor="message" className="text-sm font-medium">Mensagem</Label>
+            <Textarea id="message" name="mensagem" required minLength={10} placeholder="Como podemos ajudar? (mínimo 10 caracteres)" className="rounded-md bg-white min-h-[150px]" maxLength={2000} />
           </div>
-          <Button type="submit" disabled={isSubmitting} className="w-full rounded-none uppercase tracking-widest text-xs h-12">
-            {isSubmitting ? "Enviando..." : (
+          <Button type="submit" disabled={isSubmitting} className="w-full h-11">
+            {isSubmitting ? "Enviando…" : (
               <>
-                <Send className="mr-2 w-4 h-4" /> Enviar Mensagem
+                <Send className="mr-2 w-4 h-4" aria-hidden="true" /> Enviar mensagem
               </>
             )}
           </Button>
         </form>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 text-center border-t border-primary/5 pt-12">
+        <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-8 border-t pt-10">
           <div>
-            <Mail className="w-6 h-6 text-primary mx-auto mb-4" />
-            <h3 className="font-serif text-sm uppercase tracking-widest mb-2">E-mail</h3>
-            <p className="text-xs text-muted-foreground font-light">contato@parfumseg.com.br</p>
+            <Mail className="w-5 h-5 text-primary mb-3" aria-hidden="true" />
+            <h2 className="text-sm font-semibold mb-1">E-mail</h2>
+            <p className="text-sm text-muted-foreground">contato@parfumseg.com.br</p>
           </div>
           <div>
-            <MessageSquare className="w-6 h-6 text-primary mx-auto mb-4" />
-            <h3 className="font-serif text-sm uppercase tracking-widest mb-2">Suporte</h3>
-            <p className="text-xs text-muted-foreground font-light">Segunda a Sexta, 9h às 18h</p>
+            <MessageSquare className="w-5 h-5 text-primary mb-3" aria-hidden="true" />
+            <h2 className="text-sm font-semibold mb-1">Suporte</h2>
+            <p className="text-sm text-muted-foreground">Segunda a sexta, 9h às 18h</p>
           </div>
         </div>
       </div>
