@@ -16,11 +16,14 @@ export const Route = createFileRoute("/recomendacoes")({
   head: () => ({
     title: "Suas Recomendações | ParfumSeg",
     meta: [
-      { name: "description", content: "Perfumes selecionados a partir das suas respostas no quiz." },
+      {
+        name: "description",
+        content: "Perfumes selecionados a partir das suas respostas no quiz.",
+      },
       { property: "og:title", content: "ParfumSeg | Recomendações de Perfumes" },
-      { property: "og:type", content: "website" }
-    ]
-  })
+      { property: "og:type", content: "website" },
+    ],
+  }),
 });
 
 const formatCount = (n: number) => n.toLocaleString("pt-BR");
@@ -28,7 +31,13 @@ const formatCount = (n: number) => n.toLocaleString("pt-BR");
 function Recomendacoes() {
   const search = Route.useSearch();
   const [visible, setVisible] = useState(12);
-  const { data: recommendations, isLoading, isError, refetch, isFetching } = useQuery({
+  const {
+    data: recommendations,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ["recommendations", search],
     queryFn: () => getRecommendations({ data: search }),
     retry: 1,
@@ -77,7 +86,7 @@ function Recomendacoes() {
                   <PerfumeCard perfume={perfume} />
                   {perfume.recommendationReason && (
                     <div className="absolute top-2 right-2 z-10 max-w-[85%]">
-                      <p className="bg-white/95 border rounded-md px-2 py-1 text-[11px] leading-snug text-foreground opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity pointer-events-none">
+                      <p className="bg-white/95 border rounded-md px-2 py-1 text-[11px] leading-snug text-foreground opacity-100 transition-opacity pointer-events-none sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                         {perfume.recommendationReason}
                       </p>
                     </div>
@@ -87,7 +96,11 @@ function Recomendacoes() {
             </div>
             {recommendations.length > visible && (
               <div className="mt-10 text-center">
-                <Button variant="outline" onClick={() => setVisible((v) => v + 12)} className="px-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setVisible((v) => v + 12)}
+                  className="px-6"
+                >
                   Carregar mais
                 </Button>
               </div>

@@ -22,18 +22,33 @@ export const Route = createFileRoute("/perfume/$id")({
     return {
       title: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "Detalhes do Perfume | ParfumSeg",
       meta: [
-        { name: "description", content: data ? `Notas de ${data.nome} da ${data.marca}. Acordes: ${(data.acordes_principais ?? []).join(", ")}. Veja perfumes similares.` : "Detalhes do perfume e pirâmide olfativa completa." },
-        { property: "og:title", content: data ? `${data.nome} - ${data.marca} | ParfumSeg` : "ParfumSeg | Catálogo de Perfumes" },
-        { property: "og:description", content: data ? `Composição detalhada de ${data.nome} e fragrâncias parecidas.` : "Mais de 24.000 fragrâncias traduzidas." },
+        {
+          name: "description",
+          content: data
+            ? `Notas de ${data.nome} da ${data.marca}. Acordes: ${(data.acordes_principais ?? []).join(", ")}. Veja perfumes similares.`
+            : "Detalhes do perfume e pirâmide olfativa completa.",
+        },
+        {
+          property: "og:title",
+          content: data
+            ? `${data.nome} - ${data.marca} | ParfumSeg`
+            : "ParfumSeg | Catálogo de Perfumes",
+        },
+        {
+          property: "og:description",
+          content: data
+            ? `Composição detalhada de ${data.nome} e fragrâncias parecidas.`
+            : "Mais de 24.000 fragrâncias traduzidas.",
+        },
         { property: "og:type", content: "website" },
-        { name: "twitter:card", content: "summary_large_image" }
-      ]
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
     };
   },
   loader: async ({ params }) => {
     const { getPerfumeById } = await import("@/services/perfume.functions");
     return getPerfumeById({ data: params.id });
-  }
+  },
 });
 
 const BARRAS = [92, 74, 58, 46, 36, 28, 22];
@@ -116,7 +131,7 @@ function PerfumeDetail() {
           <div className="flex flex-col">
             <div className="mb-5">
               <p className="text-sm text-muted-foreground mb-1">{perfume.marca}</p>
-              <h1 className="text-4xl md:text-5xl txt-display">{perfume.nome}</h1>
+              <h1 className="text-4xl break-words md:text-5xl txt-display">{perfume.nome}</h1>
             </div>
 
             <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-sm text-muted-foreground mb-8 pb-6 border-b">
@@ -178,7 +193,9 @@ function PerfumeDetail() {
                     {(perfume.notas_coracao?.length ?? 0) > 0 && (
                       <div className="flex gap-3">
                         <dt className="w-16 shrink-0 font-semibold">Coração</dt>
-                        <dd className="text-muted-foreground">{perfume.notas_coracao.join(", ")}</dd>
+                        <dd className="text-muted-foreground">
+                          {perfume.notas_coracao.join(", ")}
+                        </dd>
                       </div>
                     )}
                     {(perfume.notas_fundo?.length ?? 0) > 0 && (
@@ -219,7 +236,7 @@ function PerfumeDetail() {
             <h2 id="similares-titulo" className="txt-display text-xl mb-6">
               Perfumes parecidos
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
               {similarNames.map((nomeSimilar) => {
                 const match = similaresByName.get(nomeSimilar);
                 if (!match) {

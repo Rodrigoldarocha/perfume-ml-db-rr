@@ -8,7 +8,12 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { FAQS } from "@/data/faqs";
 
 export const Route = createFileRoute("/")({
@@ -16,13 +21,21 @@ export const Route = createFileRoute("/")({
   head: () => ({
     title: "ParfumSeg | O Maior Catálogo de Perfumes em Português",
     meta: [
-      { name: "description", content: "Catálogo com mais de 24.000 fragrâncias em português, notas olfativas detalhadas e um recomendador baseado nas suas preferências." },
+      {
+        name: "description",
+        content:
+          "Catálogo com mais de 24.000 fragrâncias em português, notas olfativas detalhadas e um recomendador baseado nas suas preferências.",
+      },
       { property: "og:title", content: "ParfumSeg | Catálogo de Perfumes" },
-      { property: "og:description", content: "Mais de 24.000 perfumes com pirâmide olfativa completa e recomendações personalizadas." },
+      {
+        property: "og:description",
+        content:
+          "Mais de 24.000 perfumes com pirâmide olfativa completa e recomendações personalizadas.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" }
-    ]
-  })
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
 });
 
 const faqs = FAQS;
@@ -52,7 +65,9 @@ function Index() {
     genero: (genero || undefined) as "masculino" | "feminino" | "unissex" | undefined,
     acordo: debouncedAcordo.trim() || undefined,
   };
-  const hasActiveFilters = Boolean(marca || genero || debouncedAcordo.trim() || debouncedSearch.trim());
+  const hasActiveFilters = Boolean(
+    marca || genero || debouncedAcordo.trim() || debouncedSearch.trim(),
+  );
 
   const { data: marcas } = useSuspenseQuery({
     queryKey: ["marcas"],
@@ -141,11 +156,13 @@ function Index() {
                   id="filtro-marca"
                   value={marca}
                   onChange={(e) => setMarca(e.target.value)}
-                  className="w-full min-h-[40px] bg-white border rounded-md px-3 text-sm text-foreground"
+                  className="min-h-[40px] w-full rounded-md border border-input bg-white px-3 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="">Todas</option>
                   {marcas.map((m) => (
-                    <option key={m} value={m}>{m}</option>
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
                   ))}
                 </select>
               </div>

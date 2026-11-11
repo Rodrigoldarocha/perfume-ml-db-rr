@@ -22,7 +22,7 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
       preload="intent"
       className="block group card-rise rounded-md"
     >
-      <Card className="h-full overflow-hidden rounded-md border-0 bg-white">
+      <Card className="h-full overflow-hidden rounded-md border-0 bg-white shadow-none">
         <div
           className="aspect-[3/4] relative overflow-hidden isolate"
           style={{
