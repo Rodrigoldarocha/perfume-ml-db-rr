@@ -220,9 +220,30 @@ describe("rankRecommendations", () => {
     );
     expect(atual.compatibilityScore).toBeGreaterThan(antigo.compatibilityScore);
     expect(antigo.compatibilityScore).toBe(0);
-    // Teto: nunca passa de RECENCY_MAX (0.1) — gosto manda, recência desempata.
-    expect(atual.compatibilityScore).toBeLessThanOrEqual(0.1);
+    // Teto: RECENCY_MAX (0.25) fica abaixo da família (0.5) — gosto manda.
+    expect(atual.compatibilityScore).toBeCloseTo(0.25);
     expect(atual.recommendationReason).toContain("Lançamento recente");
+  });
+
+  test("preferência por lançamentos aumenta o bônus em 1.6x; clássicos zera", () => {
+    const p = makePerfume({ ano_lancamento: new Date().getFullYear(), avaliacao: 0 });
+    const base = { genero: "unissex", familia: "Xyz", ocasiao: "Trabalho", intensidade: "Moderada", nota: "qqq" };
+    expect(scoreCandidate(p, { ...base, epoca: "Lançamentos" }, ["xyz"]).compatibilityScore).toBeCloseTo(0.4);
+    expect(scoreCandidate(p, { ...base, epoca: "Clássicos" }, ["xyz"]).compatibilityScore).toBe(0);
+  });
+
+  test("cota: pelo menos 1/3 dos resultados são lançamentos (2020+)", () => {
+    const antigos = Array.from({ length: 40 }, (_, i) =>
+      makePerfume({ id: i + 1, nome: `Old${i}`, acordes_principais: ["Floral"], avaliacao: 5, ano_lancamento: 2000 }),
+    );
+    const novos = Array.from({ length: 20 }, (_, i) =>
+      makePerfume({ id: 100 + i, nome: `New${i}`, acordes_principais: ["Couro"], avaliacao: 0, ano_lancamento: 2021 }),
+    );
+    const input = { genero: "unissex", familia: "Floral", ocasiao: "Trabalho", intensidade: "Moderada", nota: "qqq" };
+    const ranked = rankRecommendations([...antigos, ...novos], input);
+    expect(ranked.filter((p) => (p.ano_lancamento ?? 0) >= 2020).length).toBeGreaterThanOrEqual(12);
+    const classicos = rankRecommendations([...antigos, ...novos], { ...input, epoca: "Clássicos" });
+    expect(classicos.filter((p) => (p.ano_lancamento ?? 0) >= 2020).length).toBeLessThan(12);
   });
 
   test("cluster dominante das âncoras dá bônus aos candidatos do mesmo cluster", () => {

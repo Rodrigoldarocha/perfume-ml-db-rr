@@ -44,6 +44,10 @@ export const QUIZ_STEPS: QuizStep[] = [
     multi: 3,
     options: ["Baunilha", "Lavanda", "Sândalo", "Rosa", "Limão", "Bergamota", "Jasmim", "Âmbar", "Almíscar", "Patchouli", "Vetiver", "Cedro", "Couro", "Tabaco", "Café", "Canela", "Pimenta", "Íris", "Oud", "Coco"],
   },
+  {
+    title: "Prefere clássicos ou lançamentos?",
+    options: ["Lançamentos", "Tanto faz", "Clássicos"],
+  },
 ];
 
 export const QUIZ_DEFAULTS: QuizAnswers = {
@@ -52,6 +56,7 @@ export const QUIZ_DEFAULTS: QuizAnswers = {
   ocasiao: "Dia a dia",
   intensidade: "Moderada",
   nota: "Limão",
+  epoca: "Tanto faz",
 };
 
 export interface QuizAnswers {
@@ -60,6 +65,7 @@ export interface QuizAnswers {
   ocasiao: string;
   intensidade: string;
   nota: string;
+  epoca: string;
 }
 
 export const recommendationSearchSchema = z.object({
@@ -68,6 +74,7 @@ export const recommendationSearchSchema = z.object({
   ocasiao: z.string().catch(QUIZ_DEFAULTS.ocasiao),
   intensidade: z.string().catch(QUIZ_DEFAULTS.intensidade),
   nota: z.string().catch(QUIZ_DEFAULTS.nota),
+  epoca: z.string().catch(QUIZ_DEFAULTS.epoca),
 });
 
 export type RecommendationSearch = z.infer<typeof recommendationSearchSchema>;
@@ -80,5 +87,6 @@ export function answersToSearch(answers: string[]): QuizAnswers {
     ocasiao: answers[2] || QUIZ_DEFAULTS.ocasiao,
     intensidade: answers[3] || QUIZ_DEFAULTS.intensidade,
     nota: answers[4] || QUIZ_DEFAULTS.nota,
+    epoca: answers[5] || QUIZ_DEFAULTS.epoca,
   };
 }

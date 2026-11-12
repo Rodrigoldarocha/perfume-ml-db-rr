@@ -4,6 +4,7 @@ import { Perfume } from "@/types/perfume";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import { liquidColor, liquidTint } from "@/lib/utils";
+import { RECENT_YEAR } from "@/lib/recommendation";
 
 interface PerfumeCardProps {
   perfume: Perfume;
@@ -31,6 +32,11 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
               "radial-gradient(circle at 50% 42%, rgb(255 255 255 / 0.65) 0%, rgb(255 255 255 / 0) 68%)",
           }}
         >
+          {(perfume.ano_lancamento ?? 0) >= RECENT_YEAR && (
+            <span className="absolute top-2 left-2 z-10 rounded-md bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
+              Lançamento {perfume.ano_lancamento}
+            </span>
+          )}
           {perfume.imagem_url && imgOk ? (
             <img
               src={perfume.imagem_url}

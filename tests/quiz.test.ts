@@ -8,7 +8,7 @@ import {
 
 describe("quiz constants", () => {
   test("5 passos cobrem fluxo", () => {
-    expect(QUIZ_STEPS).toHaveLength(5);
+    expect(QUIZ_STEPS).toHaveLength(6);
     for (const step of QUIZ_STEPS) {
       expect(step.options.length).toBeGreaterThan(0);
     }
@@ -18,13 +18,14 @@ describe("quiz constants", () => {
 describe("answersToSearch", () => {
   test("respostas completas mapeiam por índice", () => {
     expect(
-      answersToSearch(["Masculino", "Floral", "Trabalho", "Suave", "Rosa"]),
+      answersToSearch(["Masculino", "Floral", "Trabalho", "Suave", "Rosa", "Lançamentos"]),
     ).toEqual({
       genero: "Masculino",
       familia: "Floral",
       ocasiao: "Trabalho",
       intensidade: "Suave",
       nota: "Rosa",
+      epoca: "Lançamentos",
     });
   });
 
@@ -52,6 +53,7 @@ describe("recommendationSearchSchema", () => {
       ocasiao: "Noite/Festas",
       intensidade: "Intensa/Marcante",
       nota: "Baunilha",
+      epoca: "Clássicos",
     };
     expect(recommendationSearchSchema.parse(input)).toEqual(input);
   });
