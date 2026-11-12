@@ -67,7 +67,7 @@ export interface RecommendationInput {
   intensidade: string;
   nota: string;
   /** "Lançamentos" | "Tanto faz" | "Clássicos" */
-  epoca?: string;
+  epoca?: string | undefined;
 }
 
 export type ScoredPerfume = Perfume & {
