@@ -53,6 +53,7 @@ describe("recommendationSearchSchema", () => {
       ocasiao: "Noite/Festas",
       intensidade: "Intensa/Marcante",
       nota: "Baunilha",
+      epoca: "Clássicos",
     };
     expect(recommendationSearchSchema.parse(input)).toEqual(input);
   });
