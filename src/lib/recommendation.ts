@@ -28,8 +28,12 @@ export const INTENSITY_SCORE = 0.15;
 export const RATING_SCALE = 0.3;
 /** Bônus de recência: lançamentos novos somam no máximo este valor.
  *  Linear entre RECENCY_FLOOR_YEAR e o ano atual. */
-export const RECENCY_MAX = 0.1;
-export const RECENCY_FLOOR_YEAR = 2015;
+export const RECENCY_MAX = 0.25;
+export const RECENCY_FLOOR_YEAR = 2018;
+/** Ano a partir do qual o perfume conta como lançamento (cota + etiqueta). */
+export const RECENT_YEAR = 2020;
+/** Fração mínima de lançamentos no resultado (exceto quem prefere clássicos). */
+export const RECENT_QUOTA = 1 / 3;
 /** Bônus por coerência de cluster: candidato no mesmo cluster (K-Means) das âncoras. */
 export const CLUSTER_BONUS = 0.06;
 /** Bônus para vizinhos do ML (top5_similares) trazidos pela expansão de âncoras. */
@@ -62,6 +66,8 @@ export interface RecommendationInput {
   ocasiao: string;
   intensidade: string;
   nota: string;
+  /** "Lançamentos" | "Tanto faz" | "Clássicos" */
+  epoca?: string;
 }
 
 export type ScoredPerfume = Perfume & {
@@ -192,12 +198,15 @@ export function scoreCandidate(
   // Recência: linear de RECENCY_FLOOR_YEAR até o ano atual; desconhecido = 0.
   const ano = perfume.ano_lancamento || 0;
   const anoAtual = new Date().getFullYear();
-  const recencyPts =
+  const recencyBase =
     ano >= RECENCY_FLOOR_YEAR
       ? ((Math.min(ano, anoAtual) - RECENCY_FLOOR_YEAR) /
           Math.max(1, anoAtual - RECENCY_FLOOR_YEAR)) *
         RECENCY_MAX
       : 0;
+  const epoca = normalizePt(input.epoca ?? "");
+  const recencyMult = epoca === "classicos" ? 0 : epoca === "lancamentos" ? 1.6 : 1;
+  const recencyPts = recencyBase * recencyMult;
   const score =
     familyPts + notePts + occasionPts + intensityPts + ratingPts + recencyPts;
 
@@ -206,7 +215,7 @@ export function scoreCandidate(
   if (notePts > 0) motivos.push(`Contém notas de ${splitNotes(input.nota).join(", ")} que você aprecia`);
   if (occasionPts > 0) motivos.push(`Combina com ${input.ocasiao.toLowerCase()}`);
   if (intensityPts > 0) motivos.push(`Intensidade ${input.intensidade.toLowerCase()} alinhada ao perfil`);
-  if (recencyPts >= RECENCY_MAX * 0.7 && ano > 0)
+  if (recencyPts > 0 && ano >= RECENT_YEAR)
     motivos.push(`Lançamento recente (${ano})`);
 
   const fallbackReason = `Ideal para ${input.ocasiao.toLowerCase()}`;
@@ -340,7 +349,39 @@ export function rankRecommendations(
       expanded.push(p);
     }
   }
-  return mmrSelect(expanded, Math.min(MAX_RESULTS, FALLBACK_COUNT));
+  const count = Math.min(MAX_RESULTS, FALLBACK_COUNT);
+  const selected = mmrSelect(expanded, count);
+  if (normalizePt(input.epoca ?? "") === "classicos") return selected;
+  return enforceRecentQuota(selected, expanded, count);
+}
+
+const isRecent = (p: Perfume) => (p.ano_lancamento ?? 0) >= RECENT_YEAR;
+
+/** Garante ≥ RECENT_QUOTA de lançamentos trocando os não-recentes de menor score
+ *  pelos lançamentos de maior score que ficaram de fora. */
+export function enforceRecentQuota(
+  selected: ScoredPerfume[],
+  pool: ScoredPerfume[],
+  count: number,
+): ScoredPerfume[] {
+  const need = Math.ceil(Math.min(count, selected.length) * RECENT_QUOTA);
+  const have = selected.filter(isRecent).length;
+  if (have >= need) return selected;
+  const ids = new Set(selected.map((p) => p.id));
+  const extras = pool
+    .filter((p) => isRecent(p) && !ids.has(p.id))
+    .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+    .slice(0, need - have);
+  const result = [...selected];
+  for (const extra of extras) {
+    let idx = -1;
+    for (let i = result.length - 1; i >= 0; i--) {
+      if (!isRecent(result[i]!)) { idx = i; break; }
+    }
+    if (idx < 0) break;
+    result[idx] = extra;
+  }
+  return result.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
 }
 
 /** Similares a um perfume de referência: vizinhos do ML (top5) primeiro,

@@ -6,6 +6,7 @@ import { escapeLike } from "@/lib/text";
 import {
   rankRecommendations,
   rankSimilar,
+  RECENT_YEAR,
   resolveGenero,
   type ScoredPerfume,
 } from "@/lib/recommendation";
@@ -29,7 +30,7 @@ export const getPerfumes = createServerFn({ method: "GET" })
     // Pirâmide completa vem de getPerfumeById / getRecommendations.
     let query = supabase
       .from("perfumes")
-      .select("id,nome,marca,genero,avaliacao,acordes_principais,imagem_url", {
+      .select("id,nome,marca,genero,avaliacao,acordes_principais,imagem_url,ano_lancamento", {
         count: "exact",
       });
 
@@ -134,6 +135,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
       ocasiao: z.string().trim().min(1).max(50),
       intensidade: z.string().trim().min(1).max(50),
       nota: z.string().trim().min(1).max(200),
+      epoca: z.string().trim().max(50).optional(),
     }).parse(data)
   )
   .handler(async ({ data }) => {
@@ -148,10 +150,19 @@ export const getRecommendations = createServerFn({ method: "POST" })
         .order("id", { ascending: true })
         .range(from, from + 999);
     };
-    const pages = await Promise.all([0, 1000, 2000].map(page));
+    // Lançamentos têm poucas avaliações: página dedicada garante que entrem no pool.
+    let recentQ = supabase.from("perfumes").select(CANDIDATE_COLS).gte("ano_lancamento", RECENT_YEAR);
+    if (targetGenero !== "unissex") recentQ = recentQ.in("genero", [targetGenero, "unissex"]);
+    const recentPage = recentQ
+      .order("numero_avaliacoes", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: true })
+      .range(0, 999);
+    const pages = await Promise.all([...[0, 1000, 2000].map(page), recentPage]);
     const err = pages.find((r) => r.error)?.error;
     if (err) throw new Error(err.message);
-    const candidates = pages.flatMap((r) => r.data ?? []);
+    const byId = new Map<number, Perfume>();
+    for (const r of pages) for (const p of (r.data ?? []) as unknown as Perfume[]) byId.set(p.id, p);
+    const candidates = [...byId.values()];
 
     if (!candidates || candidates.length === 0) {
       return [];
@@ -163,6 +174,7 @@ export const getRecommendations = createServerFn({ method: "POST" })
       ocasiao: data.ocasiao,
       intensidade: data.intensidade,
       nota: data.nota,
+      epoca: data.epoca,
     }).slice(0, 36) as ScoredPerfume[];
   });
 
