@@ -4,6 +4,7 @@ import { Perfume } from "@/types/perfume";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
 import { liquidColor, liquidTint } from "@/lib/utils";
+import { PerfumeBottlePlaceholder } from "./PerfumeBottlePlaceholder";
 import { RECENT_YEAR } from "@/lib/recommendation";
 
 interface PerfumeCardProps {
@@ -43,15 +44,15 @@ export function PerfumeCard({ perfume }: PerfumeCardProps) {
               alt={`${perfume.marca} ${perfume.nome}`}
               loading="lazy"
               decoding="async"
+              ref={(el) => {
+                // cobre erros disparados antes da hidratação do React
+                if (el && el.complete && el.naturalWidth === 0) setImgOk(false);
+              }}
               onError={() => setImgOk(false)}
               className="absolute inset-0 w-full h-full object-contain p-5 mix-blend-multiply"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-              <p className="txt-display text-base leading-snug text-foreground/70">
-                {perfume.nome}
-              </p>
-            </div>
+            <PerfumeBottlePlaceholder liquid={liquid} marca={perfume.marca} />
           )}
         </div>
         <CardContent className="p-4">

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Perfume } from "@/types/perfume";
 import { liquidColor, liquidTint } from "@/lib/utils";
+import { PerfumeBottlePlaceholder } from "@/features/perfumes/components/PerfumeBottlePlaceholder";
 
 export const Route = createFileRoute("/perfume/$id")({
   component: PerfumeDetail,
@@ -116,15 +117,15 @@ function PerfumeDetail() {
               <img
                 src={perfume.imagem_url}
                 alt={`${perfume.marca} ${perfume.nome}`}
+                ref={(el) => {
+                  // cobre erros disparados antes da hidratação do React
+                  if (el && el.complete && el.naturalWidth === 0) setImgOk(false);
+                }}
                 onError={() => setImgOk(false)}
                 className="absolute inset-0 w-full h-full object-contain p-8 mix-blend-multiply"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center p-8 text-center">
-                <p className="txt-display text-3xl leading-tight text-foreground/70">
-                  {perfume.nome}
-                </p>
-              </div>
+              <PerfumeBottlePlaceholder liquid={liquid} marca={perfume.marca} size="lg" />
             )}
           </div>
 
