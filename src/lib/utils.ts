@@ -34,6 +34,11 @@ export function liquidColor(acordes: readonly string[]): string {
   return "#7a8196"; /* neutro */
 }
 
+/** Formata nota de avaliação no padrão pt-BR (ex.: 4,5). */
+export function formatNota(value: number): string {
+  return value.toFixed(1).replace(".", ",");
+}
+
 /** Fundo suave na cor do líquido (16% sobre branco). */
 export function liquidTint(color: string): string {
   return `color-mix(in srgb, ${color} 16%, #ffffff)`;
