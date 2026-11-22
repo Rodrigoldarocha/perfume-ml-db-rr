@@ -30,8 +30,8 @@ export function Layout({
         Pular para o conteúdo
       </a>
 
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-        <div className="container mx-auto flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
+      <header className="sticky top-0 z-50 border-b bg-background">
+        <div className="container mx-auto flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2">
           <Link
             to="/"
             aria-label="ParfumSeg — início"

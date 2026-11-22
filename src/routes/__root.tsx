@@ -9,6 +9,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -78,14 +79,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "description", content: "ParfumSeg - O maior catálogo de perfumes traduzido para português." },
+      {
+        name: "description",
+        content: "ParfumSeg - O maior catálogo de perfumes traduzido para português.",
+      },
       { name: "author", content: "ParfumSeg" },
       { property: "og:title", content: "ParfumSeg | Inteligência Olfativa" },
-      { property: "og:description", content: "Encontre seu perfume ideal com nosso recomendador inteligente." },
+      {
+        property: "og:description",
+        content: "Encontre seu perfume ideal com nosso recomendador inteligente.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "theme-color", content: "#1c2236" },
+      { name: "theme-color", content: "#f5efe6" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -100,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "icon", href: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
@@ -119,15 +126,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function PendingComponent() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 bg-background px-4">
-      <span className="txt-display text-2xl text-primary">
-        ParfumSeg
-      </span>
+      <span className="txt-display text-2xl text-primary">ParfumSeg</span>
       <div className="boot-bar" aria-hidden="true">
         <span />
       </div>
-      <p className="text-sm text-muted-foreground">
-        Carregando…
-      </p>
+      <p className="text-sm text-muted-foreground">Carregando…</p>
     </div>
   );
 }
@@ -169,6 +172,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster position="top-center" richColors closeButton />
     </QueryClientProvider>
   );
 }
